@@ -1,310 +1,356 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Email Marketing, Deliverability, SMTP, PowerMTA and Salesforce Marketing Cloud services.">
-<title>EmailOps — Email Marketing & Deliverability</title>
-<style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700;800&display=swap');
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-:root{
-  --bg:#f4f3ee;
-  --ink:#111;
-  --muted:#686862;
-  --line:#d7d6cf;
-  --card:#fff;
-  --dark:#101010;
-  --accent:#c7ff35;
-  --orange:#ff6b35;
-}
-*{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
-body{font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5}
-a{color:inherit;text-decoration:none}
-button{font:inherit}
-.container{width:min(1380px,92%);margin:auto}
+    <title>Email Address Extractor</title>
 
-/* NAVIGATION */
-.nav{
-  position:sticky;top:0;z-index:50;
-  background:rgba(244,243,238,.92);backdrop-filter:blur(14px);
-  border-bottom:1px solid var(--line)
-}
-.nav-inner{height:76px;display:flex;align-items:center;justify-content:space-between;gap:30px}
-.logo{font-size:20px;font-weight:800;letter-spacing:-1px}
-.logo span{font-family:"DM Mono",monospace;font-weight:400}
-.nav-links{display:flex;gap:28px;font-size:13px;font-weight:600}
-.nav-links a{position:relative}
-.nav-links a:after{content:"";position:absolute;left:0;bottom:-7px;width:0;height:1px;background:var(--ink);transition:.3s}
-.nav-links a:hover:after{width:100%}
-.nav-cta{border:1px solid var(--ink);padding:10px 16px;border-radius:30px;font-size:12px;font-weight:700}
-.menu{display:none;border:0;background:none;font-size:25px}
+    <style>
+        * {
+            box-sizing: border-box;
+        }
 
-/* HERO */
-.hero{padding:90px 0 75px;border-bottom:1px solid var(--line);overflow:hidden}
-.kicker{font:500 11px "DM Mono",monospace;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:25px}
-.hero h1{font-size:clamp(58px,9vw,145px);line-height:.86;letter-spacing:-7px;max-width:1100px;font-weight:800}
-.hero h1 em{font-style:normal;color:var(--orange)}
-.hero-bottom{display:grid;grid-template-columns:1.2fr .8fr;gap:50px;margin-top:65px}
-.hero-copy{font-size:20px;max-width:650px}
-.hero-meta{display:flex;justify-content:flex-end;align-items:flex-end;font:12px "DM Mono",monospace}
-.scroll-line{display:flex;align-items:center;gap:12px}
-.scroll-line:before{content:"";width:45px;height:1px;background:var(--ink)}
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+            color: #1f2937;
+        }
 
-/* MARQUEE */
-.marquee{background:var(--dark);color:#fff;overflow:hidden;white-space:nowrap;border-bottom:1px solid #000}
-.marquee-track{display:inline-block;padding:17px 0;font:500 12px "DM Mono",monospace;letter-spacing:1px;animation:marquee 25s linear infinite}
-.marquee-track span{margin:0 30px;color:var(--accent)}
-@keyframes marquee{to{transform:translateX(-50%)}}
+        .container {
+            max-width: 900px;
+            margin: 60px auto;
+            padding: 20px;
+        }
 
-/* SECTIONS */
-.section{padding:100px 0;border-bottom:1px solid var(--line)}
-.section-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:45px;gap:30px}
-.section-title{font-size:clamp(42px,6vw,86px);line-height:.9;letter-spacing:-4px}
-.section-note{max-width:340px;font:12px/1.7 "DM Mono",monospace;color:var(--muted);text-transform:uppercase}
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 35px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+        }
 
-/* FEATURE */
-.feature{display:grid;grid-template-columns:1.35fr .65fr;min-height:520px;background:var(--dark);color:white;overflow:hidden}
-.feature-visual{position:relative;display:flex;align-items:center;justify-content:center;min-height:520px;background:
- radial-gradient(circle at 50% 45%,rgba(199,255,53,.35),transparent 22%),
- radial-gradient(circle at 50% 45%,rgba(255,107,53,.2),transparent 44%),
- #111}
-.mail-orbit{width:310px;height:310px;border:1px solid rgba(255,255,255,.3);border-radius:50%;position:relative;animation:spin 18s linear infinite}
-.mail-orbit:before,.mail-orbit:after{content:"";position:absolute;inset:38px;border:1px dashed rgba(255,255,255,.25);border-radius:50%}
-.mail-orbit:after{inset:85px}
-.mail-icon{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:125px;height:85px;background:white;color:#111;display:grid;place-items:center;font-size:48px;box-shadow:20px 20px 0 var(--orange)}
-.node{position:absolute;width:10px;height:10px;background:var(--accent);border-radius:50%}
-.node:nth-child(1){top:4px;left:50%}.node:nth-child(2){right:30px;top:55px}.node:nth-child(3){bottom:25px;left:35px}
-@keyframes spin{to{transform:rotate(360deg)}}
-.feature-copy{padding:55px;display:flex;flex-direction:column;justify-content:space-between}
-.feature-copy h3{font-size:44px;line-height:.95;letter-spacing:-2px}
-.feature-copy p{color:#bcbcb6;font-size:15px;max-width:420px}
-.tags{display:flex;flex-wrap:wrap;gap:8px}
-.tag{border:1px solid #45453f;border-radius:30px;padding:8px 11px;font:10px "DM Mono",monospace;color:#ddd}
+        h1 {
+            text-align: center;
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
 
-/* GRID */
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-.card{background:var(--card);border:1px solid var(--line);min-height:300px;padding:25px;display:flex;flex-direction:column;justify-content:space-between;transition:.35s;position:relative;overflow:hidden}
-.card:hover{transform:translateY(-7px);box-shadow:12px 12px 0 var(--ink)}
-.card-num{font:11px "DM Mono",monospace;color:var(--muted)}
-.card h3{font-size:30px;line-height:1;letter-spacing:-1.5px;max-width:290px}
-.card p{font-size:13px;color:var(--muted);max-width:340px}
-.card .mini{font:10px "DM Mono",monospace;text-transform:uppercase;letter-spacing:1px}
-.card:after{content:"↗";position:absolute;right:22px;top:20px;font-size:22px}
+        .description {
+            text-align: center;
+            color: #6b7280;
+            margin-bottom: 30px;
+        }
 
-/* SKILLS */
-.skills-wrap{display:grid;grid-template-columns:.35fr 1.65fr;gap:50px}
-.skill-list{display:flex;flex-wrap:wrap;gap:9px}
-.skill{padding:12px 14px;border:1px solid var(--ink);border-radius:30px;font-size:13px;background:transparent;transition:.25s}
-.skill:hover{background:var(--ink);color:#fff}
+        .connection-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
 
-/* SERVICES */
-.service-list{border-top:1px solid var(--ink)}
-.service{display:grid;grid-template-columns:70px 1fr 30px;gap:20px;align-items:center;padding:20px 0;border-bottom:1px solid var(--line)}
-.service .n{font:11px "DM Mono",monospace;color:var(--muted)}
-.service h3{font-size:20px;font-weight:600}
-.service .arrow{font-size:20px;transition:.25s}
-.service:hover .arrow{transform:translateX(7px)}
+        button {
+            border: none;
+            border-radius: 8px;
+            padding: 13px 24px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
 
-/* PROCESS */
-.process{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--ink);border-left:1px solid var(--ink)}
-.step{padding:28px;border-right:1px solid var(--ink);border-bottom:1px solid var(--ink);min-height:220px}
-.step-num{font:11px "DM Mono",monospace;margin-bottom:50px}
-.step h3{font-size:25px;line-height:1;margin-bottom:12px}
-.step p{font-size:13px;color:var(--muted)}
+        button:hover {
+            transform: translateY(-1px);
+            opacity: 0.92;
+        }
 
-/* CONTACT */
-.contact{background:var(--accent);padding:100px 0}
-.contact h2{font-size:clamp(52px,8vw,120px);letter-spacing:-6px;line-height:.85;max-width:1000px}
-.contact-row{display:flex;justify-content:space-between;align-items:flex-end;margin-top:55px;gap:30px}
-.contact p{max-width:450px}
-.contact-btn{background:var(--ink);color:#fff;padding:18px 25px;border-radius:40px;font-weight:700;white-space:nowrap}
+        .gmail-btn {
+            background: #4285f4;
+            color: white;
+        }
 
-/* FOOTER */
-footer{background:var(--dark);color:#fff;padding:35px 0}
-.footer-inner{display:flex;justify-content:space-between;gap:30px;font:11px "DM Mono",monospace;color:#aaa}
-.footer-inner strong{color:#fff}
+        .outlook-btn {
+            background: #0078d4;
+            color: white;
+        }
 
-/* RESPONSIVE */
-@media(max-width:850px){
-  .nav-links,.nav-cta{display:none}.menu{display:block}
-  .hero{padding-top:60px}.hero h1{letter-spacing:-4px}
-  .hero-bottom,.feature,.skills-wrap{grid-template-columns:1fr}
-  .hero-meta{justify-content:flex-start}
-  .grid{grid-template-columns:1fr 1fr}
-  .process{grid-template-columns:1fr 1fr}
-  .feature-copy{padding:35px}
-}
-@media(max-width:560px){
-  .nav-inner{height:65px}
-  .hero h1{font-size:58px}
-  .section{padding:70px 0}
-  .section-head{display:block}.section-note{margin-top:25px}
-  .grid,.process{grid-template-columns:1fr}
-  .feature-visual{min-height:360px}.mail-orbit{width:230px;height:230px}
-  .service{grid-template-columns:45px 1fr 20px}.service h3{font-size:16px}
-  .contact h2{letter-spacing:-3px}.contact-row,.footer-inner{display:block}.contact-btn{display:inline-block;margin-top:25px}
-}
-</style>
+        .extract-btn {
+            background: #111827;
+            color: white;
+        }
+
+        .export-btn {
+            background: #16a34a;
+            color: white;
+        }
+
+        .status-box {
+            margin-top: 30px;
+            padding: 18px;
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+        }
+
+        .status-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        #status {
+            color: #6b7280;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat {
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .results {
+            margin-top: 30px;
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 280px;
+            padding: 15px;
+            border: 1px solid #d1d5db;
+            border-radius: 10px;
+            resize: vertical;
+            font-family: monospace;
+            font-size: 14px;
+            background: #fafafa;
+        }
+
+        .notice {
+            margin-top: 25px;
+            padding: 15px;
+            border-radius: 10px;
+            background: #fff7ed;
+            border: 1px solid #fed7aa;
+            color: #9a3412;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                margin: 20px auto;
+            }
+
+            .card {
+                padding: 22px;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
+
 <body>
 
-<header class="nav">
-  <div class="container nav-inner">
-    <a class="logo" href="#home">EMAIL<span>/</span>OPS</a>
-    <nav class="nav-links">
-      <a href="#skills">Skills</a>
-      <a href="#services">Services</a>
-      <a href="#workflow">Workflow</a>
-      <a href="#about">About</a>
-    </nav>
-    <a class="nav-cta" href="#contact">Let's connect ↗</a>
-    <button class="menu" aria-label="Menu">☰</button>
-  </div>
-</header>
+<div class="container">
 
-<main>
-<section class="hero" id="home">
-  <div class="container">
-    <div class="kicker">Email Marketing / Deliverability / Automation</div>
-    <h1>EMAIL<br><em>THAT</em><br>DELIVERS.</h1>
-    <div class="hero-bottom">
-      <p class="hero-copy">A focused portfolio of email marketing operations, deliverability, CRM, Salesforce Marketing Cloud and marketing automation skills.</p>
-      <div class="hero-meta"><div class="scroll-line">SCROLL TO EXPLORE</div></div>
+    <div class="card">
+
+        <h1>Email Address Extractor</h1>
+
+        <p class="description">
+            Connect an authorized mailbox and extract unique email addresses.
+        </p>
+
+        <div class="connection-buttons">
+
+            <button
+                class="gmail-btn"
+                onclick="connectGmail()">
+                Connect Gmail
+            </button>
+
+            <button
+                class="outlook-btn"
+                onclick="connectOutlook()">
+                Connect Outlook
+            </button>
+
+        </div>
+
+        <div class="status-box">
+
+            <div class="status-title">
+                Connection Status
+            </div>
+
+            <div id="status">
+                Not connected
+            </div>
+
+        </div>
+
+        <div class="stats">
+
+            <div class="stat">
+                <div
+                    class="stat-number"
+                    id="messageCount">
+                    0
+                </div>
+
+                <div class="stat-label">
+                    Messages Scanned
+                </div>
+            </div>
+
+            <div class="stat">
+                <div
+                    class="stat-number"
+                    id="uniqueCount">
+                    0
+                </div>
+
+                <div class="stat-label">
+                    Unique Email Addresses
+                </div>
+            </div>
+
+        </div>
+
+        <div class="results">
+
+            <div class="results-header">
+
+                <h2>
+                    Email Addresses
+                </h2>
+
+                <div>
+
+                    <button
+                        class="extract-btn"
+                        onclick="extractAddresses()">
+                        Extract Addresses
+                    </button>
+
+                    <button
+                        class="export-btn"
+                        onclick="exportCSV()">
+                        Export CSV
+                    </button>
+
+                </div>
+
+            </div>
+
+            <textarea
+                id="emailResults"
+                readonly
+                placeholder="Unique email addresses will appear here..."></textarea>
+
+        </div>
+
+        <div class="notice">
+            <strong>Security:</strong>
+            This website will use the mailbox provider's secure
+            authorization system. Your email password will not be
+            collected or stored by this webpage.
+        </div>
+
     </div>
-  </div>
-</section>
 
-<div class="marquee">
-  <div class="marquee-track">
-    EMAIL MARKETING <span>✦</span> DELIVERABILITY <span>✦</span> SMTP <span>✦</span> POWERMTA <span>✦</span> SFMC <span>✦</span> AUTOMATION <span>✦</span> PERSONALIZATION <span>✦</span>
-    EMAIL MARKETING <span>✦</span> DELIVERABILITY <span>✦</span> SMTP <span>✦</span> POWERMTA <span>✦</span> SFMC <span>✦</span> AUTOMATION <span>✦</span> PERSONALIZATION <span>✦</span>
-  </div>
 </div>
 
-<section class="section">
-  <div class="container">
-    <div class="section-head">
-      <h2 class="section-title">THE<br>FOCUS</h2>
-      <p class="section-note">From campaign execution to inbox placement — connecting technical email operations with customer lifecycle marketing.</p>
-    </div>
-    <div class="feature">
-      <div class="feature-visual">
-        <div class="mail-orbit">
-          <i class="node"></i><i class="node"></i><i class="node"></i>
-          <div class="mail-icon">✉</div>
-        </div>
-      </div>
-      <div class="feature-copy">
-        <div>
-          <div class="kicker">01 / Core capability</div>
-          <h3>BUILD.<br>SEND.<br>DELIVER.</h3>
-        </div>
-        <p>Email is more than sending a campaign. It is data, infrastructure, segmentation, content, automation, testing and measurement working together.</p>
-        <div class="tags">
-          <span class="tag">SMTP</span><span class="tag">IP REPUTATION</span><span class="tag">SFMC</span><span class="tag">SQL</span><span class="tag">AMPscript</span>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
+<script>
 
-<section class="section" id="skills">
-  <div class="container">
-    <div class="section-head">
-      <h2 class="section-title">SKILLS<br>INDEX</h2>
-      <p class="section-note">A growing technical and marketing toolkit for modern email operations.</p>
-    </div>
-    <div class="skills-wrap">
-      <div class="kicker">Skills / 01—37</div>
-      <div class="skill-list">
-        <span class="skill">Email Marketing</span><span class="skill">Bulk Email Marketing</span><span class="skill">Email Deliverability</span><span class="skill">SMTP</span><span class="skill">IP Reputation</span><span class="skill">Dedicated IP Management</span><span class="skill">Email Headers</span><span class="skill">PowerMTA</span><span class="skill">Campaign Operations</span><span class="skill">Customer Lifecycle Marketing</span><span class="skill">Audience Segmentation</span><span class="skill">Personalization</span><span class="skill">A/B Testing</span><span class="skill">Email KPI Analysis</span><span class="skill">Permission-Based Marketing</span><span class="skill">CRM Fundamentals</span><span class="skill">Salesforce Marketing Cloud</span><span class="skill">Email Studio</span><span class="skill">Content Builder</span><span class="skill">Contact Builder</span><span class="skill">Journey Builder</span><span class="skill">Automation Studio</span><span class="skill">Mobile Studio</span><span class="skill">Analytics Builder</span><span class="skill">SQL</span><span class="skill">AMPscript</span><span class="skill">HTML</span><span class="skill">CSS</span><span class="skill">Responsive Email Design</span><span class="skill">Marketing Automation</span><span class="skill">Customer Journey Management</span><span class="skill">Reporting &amp; Analytics</span><span class="skill">Deliverability Management</span><span class="skill">Bounce Analysis</span><span class="skill">Unsubscribe Management</span><span class="skill">Revenue Attribution</span>
-      </div>
-    </div>
-  </div>
-</section>
+    let emailAddresses = new Set();
 
-<section class="section" id="services">
-  <div class="container">
-    <div class="section-head">
-      <h2 class="section-title">WHAT<br>I WORK ON</h2>
-      <p class="section-note">Service-style capabilities presented as an email operations portfolio.</p>
-    </div>
-    <div class="service-list">
-      <div class="service"><span class="n">01</span><h3>Email Marketing</h3><span class="arrow">↗</span></div>
-      <div class="service"><span class="n">02</span><h3>Bulk Email Campaign Management</h3><span class="arrow">↗</span></div>
-      <div class="service"><span class="n">03</span><h3>Email Deliverability Management</h3><span class="arrow">↗</span></div>
-      <div class="service"><span class="n">04</span><h3>SMTP &amp; IP Reputation Management</h3><span class="arrow">↗</span></div>
-      <div class="service"><span class="n">05</span><h3>PowerMTA Management</h3><span class="arrow">↗</span></div>
-      <div class="service"><span class="n">06</span><h3>Campaign Operations</h3><span class="arrow">↗</span></div>
-      <div class="service"><span class="n">07</span><h3>Audience Segmentation &amp; Personalization</h3><span class="arrow">↗</span></div>
-      <div class="service"><span class="n">08</span><h3>A/B Testing</h3><span class="arrow">↗</span></div>
-      <div class="service"><span class="n">09</span><h3>Marketing Automation</h3><span class="arrow">↗</span></div>
-      <div class="service"><span class="n">10</span><h3>Customer Journey Automation</h3><span class="arrow">↗</span></div>
-      <div class="service"><span class="n">11</span><h3>Welcome / Cart Abandonment / Birthday Campaigns</h3><span class="arrow">↗</span></div>
-      <div class="service"><span class="n">12</span><h3>Re-engagement &amp; Win-back Campaigns</h3><span class="arrow">↗</span></div>
-      <div class="service"><span class="n">13</span><h3>Email Reporting &amp; Analytics</h3><span class="arrow">↗</span></div>
-      <div class="service"><span class="n">14</span><h3>Deliverability Monitoring</h3><span class="arrow">↗</span></div>
-      <div class="service"><span class="n">15</span><h3>Bounce &amp; Unsubscribe Management</h3><span class="arrow">↗</span></div>
-      <div class="service"><span class="n">16</span><h3>Salesforce Marketing Cloud Implementation</h3><span class="arrow">↗</span></div>
-      <div class="service"><span class="n">17</span><h3>SFMC Automation &amp; Journey Building</h3><span class="arrow">↗</span></div>
-      <div class="service"><span class="n">18</span><h3>SQL-Based Audience Segmentation</h3><span class="arrow">↗</span></div>
-      <div class="service"><span class="n">19</span><h3>AMPscript Personalization</h3><span class="arrow">↗</span></div>
-      <div class="service"><span class="n">20</span><h3>HTML Email Development</h3><span class="arrow">↗</span></div>
-    </div>
-  </div>
-</section>
+    function connectGmail() {
 
-<section class="section" id="workflow">
-  <div class="container">
-    <div class="section-head">
-      <h2 class="section-title">EMAIL<br>WORKFLOW</h2>
-      <p class="section-note">A simple operating model from audience data to measurable results.</p>
-    </div>
-    <div class="process">
-      <div class="step"><div class="step-num">01 / DATA</div><h3>Audience</h3><p>CRM data, segmentation, consent and subscriber attributes.</p></div>
-      <div class="step"><div class="step-num">02 / BUILD</div><h3>Content</h3><p>HTML, CSS, Content Builder, AMPscript and personalization.</p></div>
-      <div class="step"><div class="step-num">03 / AUTOMATE</div><h3>Journey</h3><p>Journey Builder, Automation Studio, triggers and lifecycle flows.</p></div>
-      <div class="step"><div class="step-num">04 / MEASURE</div><h3>Optimize</h3><p>Delivery, opens, clicks, bounces, unsubscribes and revenue attribution.</p></div>
-    </div>
-  </div>
-</section>
+        document.getElementById("status").textContent =
+            "Gmail OAuth connection will be configured next.";
 
-<section class="section" id="about">
-  <div class="container">
-    <div class="section-head">
-      <h2 class="section-title">CURRENT<br>LEARNING</h2>
-      <p class="section-note">A practical learning portfolio focused on becoming job-ready in email marketing and SFMC.</p>
-    </div>
-    <div class="grid">
-      <article class="card"><span class="card-num">LEARNING / 01</span><h3>Salesforce Marketing Cloud</h3><p>Email Studio, Content Builder, Contact Builder, Journey Builder and Automation Studio.</p><span class="mini">SFMC</span></article>
-      <article class="card"><span class="card-num">LEARNING / 02</span><h3>Deliverability</h3><p>SMTP, DNS, authentication concepts, IP reputation, bounce analysis and inbox placement.</p><span class="mini">INFRASTRUCTURE</span></article>
-      <article class="card"><span class="card-num">LEARNING / 03</span><h3>Data &amp; Personalization</h3><p>SQL segmentation, subscriber attributes, AMPscript and lifecycle personalization.</p><span class="mini">DATA</span></article>
-      <article class="card"><span class="card-num">LEARNING / 04</span><h3>Email Design</h3><p>HTML, CSS, responsive layouts, accessibility and email-client considerations.</p><span class="mini">FRONTEND</span></article>
-      <article class="card"><span class="card-num">LEARNING / 05</span><h3>Campaign Operations</h3><p>QA, scheduling, testing, deployment, monitoring and reporting.</p><span class="mini">OPERATIONS</span></article>
-      <article class="card"><span class="card-num">LEARNING / 06</span><h3>Analytics</h3><p>Email KPI analysis, engagement, deliverability trends and revenue attribution.</p><span class="mini">MEASUREMENT</span></article>
-    </div>
-  </div>
-</section>
+    }
 
-<section class="contact" id="contact">
-  <div class="container">
-    <div class="kicker">CONTACT / COLLABORATE / CONNECT</div>
-    <h2>LET'S MAKE EMAIL<br>WORK HARDER.</h2>
-    <div class="contact-row">
-      <p>Interested in email marketing, SFMC, deliverability or campaign operations? This section can be connected to your email address, LinkedIn profile or contact form.</p>
-      <a class="contact-btn" href="mailto:your-email@example.com">CONTACT ME ↗</a>
-    </div>
-  </div>
-</section>
-</main>
+    function connectOutlook() {
 
-<footer>
-  <div class="container footer-inner">
-    <div><strong>EMAIL/OPS</strong> — Email Marketing Portfolio</div>
-    <div>© 2026 / Built with HTML + CSS</div>
-  </div>
-</footer>
+        document.getElementById("status").textContent =
+            "Microsoft OAuth connection will be configured next.";
+
+    }
+
+    function extractAddresses() {
+
+        document.getElementById("status").textContent =
+            "Mailbox connection is not configured yet.";
+
+    }
+
+    function exportCSV() {
+
+        if (emailAddresses.size === 0) {
+
+            alert("No email addresses available.");
+
+            return;
+        }
+
+        const emails = Array.from(emailAddresses);
+
+        const csv =
+            "Email Address\n" +
+            emails.join("\n");
+
+        const blob = new Blob(
+            [csv],
+            { type: "text/csv;charset=utf-8;" }
+        );
+
+        const url = URL.createObjectURL(blob);
+
+        const link = document.createElement("a");
+
+        link.href = url;
+        link.download = "unique-email-addresses.csv";
+
+        link.click();
+
+        URL.revokeObjectURL(url);
+
+    }
+
+</script>
+
 </body>
 </html>
