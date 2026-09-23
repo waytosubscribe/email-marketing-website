@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MailScope — Email Address Intelligence</title>
+    <title>Extract Emails — Email Address Intelligence</title>
 
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 
@@ -376,10 +376,359 @@
                 padding: 20px 12px;
             }
         }
-    </style>
+    
+/* ============================================================
+   MODERN UI REFRESH — VISUAL ONLY
+   Core Gmail/API/extraction logic remains unchanged.
+   ============================================================ */
+:root {
+    --bg: #f5f7fb;
+    --card: rgba(255,255,255,.86);
+    --card-light: rgba(248,250,252,.92);
+    --border: rgba(15,23,42,.09);
+    --text: #0f172a;
+    --muted: #64748b;
+    --blue: #2563eb;
+    --green: #16a34a;
+    --purple: #7c3aed;
+    --orange: #ea580c;
+    --red: #dc2626;
+    --shadow: 0 18px 55px rgba(15,23,42,.08);
+    --shadow-hover: 0 22px 70px rgba(37,99,235,.13);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+    min-height: 100vh;
+    color: var(--text);
+    background:
+        radial-gradient(circle at 8% 5%, rgba(37,99,235,.11), transparent 28%),
+        radial-gradient(circle at 92% 18%, rgba(124,58,237,.10), transparent 27%),
+        linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
+    background-attachment: fixed;
+    transition: background .35s ease, color .35s ease;
+}
+
+body.dark-theme {
+    --bg: #070b14;
+    --card: rgba(15,23,42,.78);
+    --card-light: rgba(255,255,255,.055);
+    --border: rgba(255,255,255,.10);
+    --text: #f8fafc;
+    --muted: #94a3b8;
+    --shadow: 0 22px 70px rgba(0,0,0,.34);
+    background:
+        radial-gradient(circle at 12% 8%, rgba(37,99,235,.18), transparent 28%),
+        radial-gradient(circle at 88% 25%, rgba(124,58,237,.16), transparent 30%),
+        #070b14;
+}
+
+.container {
+    max-width: 1240px;
+    padding: 28px 22px 70px;
+}
+
+.app-header {
+    position: relative;
+    padding: 24px 0 16px;
+    margin-bottom: 20px;
+}
+
+.app-header::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    width: 92px;
+    height: 4px;
+    border-radius: 99px;
+    transform: translateX(-50%);
+    background: linear-gradient(90deg, #2563eb, #7c3aed);
+    animation: headerPulse 2.4s ease-in-out infinite;
+}
+
+@keyframes headerPulse {
+    0%,100% { opacity: .55; transform: translateX(-50%) scaleX(.8); }
+    50% { opacity: 1; transform: translateX(-50%) scaleX(1.15); }
+}
+
+.logo {
+    position: relative;
+    width: 76px;
+    height: 76px;
+    border-radius: 24px;
+    background: linear-gradient(135deg, #2563eb, #7c3aed);
+    box-shadow: 0 16px 45px rgba(37,99,235,.28);
+    font-size: 0;
+    overflow: visible;
+    animation: logoFloat 3s ease-in-out infinite;
+}
+
+.logo::before {
+    content: "✉";
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    color: #fff;
+    font-size: 34px;
+    font-weight: 800;
+}
+
+.logo::after {
+    content: "";
+    position: absolute;
+    inset: -7px;
+    border: 2px solid rgba(37,99,235,.25);
+    border-radius: 28px;
+    animation: logoRing 2s ease-out infinite;
+}
+
+@keyframes logoFloat {
+    0%,100% { transform: translateY(0) rotate(0); }
+    50% { transform: translateY(-5px) rotate(-2deg); }
+}
+@keyframes logoRing {
+    0% { opacity: .65; transform: scale(.96); }
+    100% { opacity: 0; transform: scale(1.18); }
+}
+
+h1 {
+    margin-top: 4px;
+    font-size: clamp(34px, 5vw, 48px);
+    font-weight: 850;
+    letter-spacing: -1.8px;
+    background: linear-gradient(135deg, #0f172a, #2563eb 55%, #7c3aed);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+.dark-theme h1 {
+    background: linear-gradient(135deg, #fff, #93c5fd 55%, #c4b5fd);
+    -webkit-background-clip: text;
+    background-clip: text;
+}
+
+.subtitle {
+    font-size: 15px;
+    color: var(--muted);
+    letter-spacing: .1px;
+}
+
+.card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 26px;
+    box-shadow: var(--shadow);
+    margin-bottom: 18px;
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
+    transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+}
+.card:hover {
+    box-shadow: var(--shadow-hover);
+    border-color: rgba(37,99,235,.16);
+}
+
+.card:first-of-type {
+    position: relative;
+    overflow: hidden;
+}
+.card:first-of-type::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #2563eb, #7c3aed, #06b6d4);
+}
+
+.connection-buttons { gap: 10px; }
+
+button {
+    min-height: 42px;
+    border-radius: 12px;
+    padding: 11px 17px;
+    box-shadow: 0 7px 18px rgba(15,23,42,.08);
+    letter-spacing: .05px;
+}
+button:hover {
+    box-shadow: 0 12px 26px rgba(37,99,235,.15);
+}
+button:active { transform: translateY(0) scale(.98); }
+
+.gmail-btn { background: linear-gradient(135deg,#4285f4,#2563eb); }
+.disconnect-btn { background: linear-gradient(135deg,#ef4444,#b91c1c); }
+.extract-btn { background: linear-gradient(135deg,#2563eb,#4f46e5); }
+.export-btn { background: linear-gradient(135deg,#16a34a,#15803d); }
+.copy-btn { background: linear-gradient(135deg,#8b5cf6,#6d28d9); }
+
+.settings { gap: 13px; margin-top: 20px; }
+
+.setting-card {
+    background: var(--card-light);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 17px;
+    transition: border-color .2s ease, transform .2s ease;
+}
+.setting-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(37,99,235,.24);
+}
+.setting-card label {
+    font-weight: 700;
+    color: var(--muted);
+    letter-spacing: .2px;
+}
+input, select {
+    min-height: 44px;
+    color: var(--text) !important;
+    background: rgba(255,255,255,.72) !important;
+    border-color: var(--border) !important;
+    border-radius: 11px !important;
+    transition: box-shadow .2s ease, border-color .2s ease;
+}
+.dark-theme input, .dark-theme select {
+    background: rgba(0,0,0,.25) !important;
+}
+input:focus, select:focus {
+    border-color: rgba(37,99,235,.65) !important;
+    box-shadow: 0 0 0 4px rgba(37,99,235,.11) !important;
+}
+
+.status-box {
+    background: var(--card-light);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+}
+.status-title { color: var(--text); }
+
+.stats { gap: 12px; }
+.stat {
+    position: relative;
+    overflow: hidden;
+    padding: 19px;
+    border-radius: 17px;
+    background: var(--card-light);
+    border: 1px solid var(--border);
+}
+.stat::after {
+    content: "";
+    position: absolute;
+    right: -18px;
+    bottom: -25px;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: rgba(37,99,235,.07);
+}
+.stat-number { font-variant-numeric: tabular-nums; }
+
+.domain-grid { gap: 13px; }
+.domain-card {
+    background: var(--card-light);
+    border: 1px solid var(--border);
+    border-radius: 17px;
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+.domain-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 38px rgba(15,23,42,.08);
+}
+.domain-header {
+    padding: 14px 15px;
+    border-bottom: 1px solid var(--border);
+}
+.domain-title { font-size: 14px; }
+.domain-list {
+    color: var(--text);
+    background: transparent;
+}
+
+.results textarea {
+    color: var(--text);
+    background: rgba(255,255,255,.58);
+    border-color: var(--border);
+    border-radius: 15px;
+}
+.dark-theme .results textarea {
+    background: rgba(0,0,0,.24);
+}
+
+.notice {
+    background: rgba(37,99,235,.06);
+    border: 1px solid rgba(37,99,235,.15);
+    color: var(--muted);
+    border-radius: 16px;
+}
+
+/* Theme control */
+.theme-toggle {
+    position: fixed;
+    z-index: 50;
+    top: 18px;
+    right: 18px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px;
+    min-height: auto;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--card);
+    color: var(--text);
+    backdrop-filter: blur(16px);
+    box-shadow: 0 10px 35px rgba(15,23,42,.12);
+}
+.theme-toggle span {
+    width: 34px;
+    height: 34px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    font-size: 15px;
+}
+.theme-toggle .active {
+    background: var(--blue);
+    color: #fff;
+}
+.theme-toggle:hover { transform: none; }
+
+@media(max-width:800px) {
+    .theme-toggle { top: 10px; right: 10px; }
+    .app-header { padding-top: 48px; }
+}
+@media(max-width:500px) {
+    .container { padding: 18px 12px 45px; }
+    .card { padding: 18px; border-radius: 19px; }
+    .theme-toggle span { width: 30px; height: 30px; }
+}
+
+/* Reduced motion accessibility */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+</style>
 </head>
 
 <body>
+
+    <button class="theme-toggle" id="themeToggle" type="button"
+        aria-label="Switch theme" title="Switch theme">
+        <span id="lightThemeBtn" class="active">☀</span>
+        <span id="darkThemeBtn">☾</span>
+    </button>
+
 
     <div class="container">
 
@@ -387,7 +736,7 @@
 
             <div class="logo">✉</div>
 
-            <h1>MailScope</h1>
+            <h1>Extract Emails</h1>
 
             <div class="subtitle">
                 Email Address Intelligence & ISP Domain Extractor
@@ -2181,8 +2530,37 @@ document.getElementById(
 new Event("change")
 );
 
+
+// ============================================================
+// LIGHT / DARK THEME — VISUAL ONLY
+// ============================================================
+(function initTheme() {
+    const savedTheme = localStorage.getItem("extractEmailsTheme");
+    const prefersDark = window.matchMedia &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches;
+    applyTheme(savedTheme || (prefersDark ? "dark" : "light"));
+
+    document.getElementById("themeToggle").addEventListener("click", function () {
+        const next = document.body.classList.contains("dark-theme") ? "light" : "dark";
+        applyTheme(next);
+        localStorage.setItem("extractEmailsTheme", next);
+    });
+
+    function applyTheme(theme) {
+        const dark = theme === "dark";
+        document.body.classList.toggle("dark-theme", dark);
+        document.getElementById("lightThemeBtn").classList.toggle("active", !dark);
+        document.getElementById("darkThemeBtn").classList.toggle("active", dark);
+    }
+})();
+
     </script>
 
 </body>
 
 </html>
+
+
+this is my current email extractor code which is looks very old style make it with current updation level ui designs and button types lists add ux designs which is enhance this webpage quality with current trend and dont change any core concepts only alterate its looks  
+
+Change the name Mailscope to Extract Emails with any animated live logo with this name and add light and dark theme on top
