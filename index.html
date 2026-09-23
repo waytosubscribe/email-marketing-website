@@ -1,296 +1,415 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Email Address Extractor</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MailScope — Email Address Intelligence</title>
 
-<script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
 
-<style>
-* { box-sizing: border-box; }
+    <style>
+        * {
+            box-sizing: border-box;
+        }
 
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #f4f7fb;
-  color: #1f2937;
-}
+        :root {
+            --bg: #07111f;
+            --card: rgba(13, 25, 42, 0.88);
+            --card-light: rgba(255, 255, 255, 0.07);
+            --border: rgba(255, 255, 255, 0.12);
+            --text: #f8fafc;
+            --muted: #94a3b8;
+            --blue: #3b82f6;
+            --green: #22c55e;
+            --purple: #8b5cf6;
+            --orange: #f97316;
+            --red: #ef4444;
+        }
 
-.container {
-  max-width: 1000px;
-  margin: 40px auto;
-  padding: 20px;
-}
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: Inter, Arial, sans-serif;
+            color: var(--text);
 
-.card {
-  background: white;
-  border-radius: 16px;
-  padding: 35px;
-  box-shadow: 0 8px 30px rgba(0,0,0,0.08);
-}
+            background:
+                linear-gradient(135deg,
+                    rgba(3, 10, 20, 0.94),
+                    rgba(7, 17, 31, 0.88)),
+                url("https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=2400&q=85");
 
-h1 {
-  text-align: center;
-  margin-top: 0;
-  margin-bottom: 10px;
-}
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
 
-.description {
-  text-align: center;
-  color: #6b7280;
-  margin-bottom: 30px;
-}
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background:
+                radial-gradient(circle at 15% 20%, rgba(59, 130, 246, .18), transparent 30%),
+                radial-gradient(circle at 85% 70%, rgba(139, 92, 246, .15), transparent 30%);
+        }
 
-.connection-buttons {
-  display: flex;
-  gap: 15px;
-  justify-content: center;
-  flex-wrap: wrap;
-}
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 35px 20px 60px;
+        }
 
-button {
-  border: none;
-  border-radius: 8px;
-  padding: 13px 24px;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: 0.2s;
-}
+        .app-header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
 
-button:hover {
-  transform: translateY(-1px);
-  opacity: 0.92;
-}
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 64px;
+            height: 64px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            box-shadow: 0 15px 45px rgba(37, 99, 235, .35);
+            font-size: 30px;
+            margin-bottom: 14px;
+        }
 
-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
-}
+        h1 {
+            margin: 0;
+            font-size: 38px;
+            letter-spacing: -1px;
+        }
 
-.gmail-btn {
-  background: #4285f4;
-  color: white;
-}
+        .subtitle {
+            margin-top: 10px;
+            color: var(--muted);
+            font-size: 16px;
+        }
 
-.disconnect-btn {
-  background: #dc2626;
-  color: white;
-}
+        .card {
+            background: var(--card);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            padding: 28px;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, .35);
+            margin-bottom: 20px;
+        }
 
-.extract-btn {
-  background: #111827;
-  color: white;
-}
+        .connection-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
 
-.export-btn {
-  background: #16a34a;
-  color: white;
-}
+        button {
+            border: 0;
+            border-radius: 10px;
+            padding: 12px 20px;
+            color: white;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: .2s ease;
+        }
 
-.export-small {
-  background: #2563eb;
-  color: white;
-  padding: 8px 14px;
-  font-size: 13px;
-}
+        button:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.08);
+        }
 
-.status-box {
-  margin-top: 30px;
-  padding: 18px;
-  background: #f8fafc;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-}
+        button:disabled {
+            opacity: .45;
+            cursor: not-allowed;
+            transform: none;
+        }
 
-.status-title {
-  font-weight: bold;
-  margin-bottom: 8px;
-}
+        .gmail-btn {
+            background: linear-gradient(135deg, #4285f4, #2563eb);
+        }
 
-#status {
-  color: #6b7280;
-}
+        .disconnect-btn {
+            background: linear-gradient(135deg, #ef4444, #b91c1c);
+        }
 
-.progress-wrap {
-  margin-top: 12px;
-  background: #e5e7eb;
-  border-radius: 6px;
-  height: 8px;
-  overflow: hidden;
-  display: none;
-}
+        .extract-btn {
+            background: linear-gradient(135deg, #2563eb, #4f46e5);
+        }
 
-.progress-bar {
-  height: 100%;
-  background: #4285f4;
-  width: 0%;
-  transition: width 0.2s;
-}
+        .export-btn {
+            background: linear-gradient(135deg, #16a34a, #15803d);
+        }
 
-.stats {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 15px;
-  margin-top: 20px;
-}
+        .copy-btn {
+            background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+        }
 
-.stat {
-  background: #f8fafc;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  padding: 20px;
-  text-align: center;
-}
+        .small-btn {
+            padding: 8px 12px;
+            font-size: 12px;
+        }
 
-.stat-number {
-  font-size: 28px;
-  font-weight: bold;
-  margin-bottom: 5px;
-}
+        .settings {
+            margin-top: 22px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
 
-.stat-label {
-  color: #6b7280;
-  font-size: 14px;
-}
+        .setting-card {
+            background: var(--card-light);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 18px;
+        }
 
-.domain-section {
-  margin-top: 30px;
-}
+        .setting-card label {
+            display: block;
+            color: var(--muted);
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
 
-.domain-card {
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  margin-bottom: 15px;
-  overflow: hidden;
-}
+        input {
+            width: 100%;
+            background: rgba(0, 0, 0, .25);
+            color: white;
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            padding: 11px 12px;
+            outline: none;
+        }
 
-.domain-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
-  padding: 15px 18px;
-  background: #f8fafc;
-  flex-wrap: wrap;
-}
+        input:focus {
+            border-color: var(--blue);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, .12);
+        }
 
-.domain-title {
-  font-weight: bold;
-  font-size: 16px;
-}
+        .status-box {
+            margin-top: 20px;
+            padding: 17px;
+            border-radius: 13px;
+            background: rgba(0, 0, 0, .2);
+            border: 1px solid var(--border);
+        }
 
-.domain-count {
-  color: #6b7280;
-  font-size: 14px;
-  margin-left: 8px;
-}
+        .status-title {
+            font-weight: 700;
+            margin-bottom: 7px;
+        }
 
-.domain-list {
-  padding: 15px 18px;
-  max-height: 220px;
-  overflow-y: auto;
-  font-family: monospace;
-  font-size: 14px;
-  line-height: 1.8;
-  white-space: pre-wrap;
-  word-break: break-all;
-}
+        #status {
+            color: var(--muted);
+        }
 
-.results {
-  margin-top: 30px;
-}
+        .progress-wrap {
+            margin-top: 13px;
+            background: rgba(255, 255, 255, .08);
+            height: 7px;
+            border-radius: 20px;
+            overflow: hidden;
+            display: none;
+        }
 
-.results-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 15px;
-  margin-bottom: 10px;
-  flex-wrap: wrap;
-}
+        .progress-bar {
+            height: 100%;
+            width: 0;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            transition: width .2s;
+        }
 
-.settings-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 15px;
-  justify-content: center;
-  flex-wrap: wrap;
-  font-size: 14px;
-  color: #374151;
-}
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+            margin-top: 20px;
+        }
 
-.settings-row input[type="number"] {
-  width: 90px;
-  padding: 6px 8px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-}
+        .stat {
+            padding: 20px;
+            text-align: center;
+            border-radius: 14px;
+            background: var(--card-light);
+            border: 1px solid var(--border);
+        }
 
-textarea {
-  width: 100%;
-  min-height: 280px;
-  padding: 15px;
-  border: 1px solid #d1d5db;
-  border-radius: 10px;
-  resize: vertical;
-  font-family: monospace;
-  font-size: 14px;
-  background: #fafafa;
-}
+        .stat-number {
+            font-size: 29px;
+            font-weight: 800;
+        }
 
-.notice {
-  margin-top: 25px;
-  padding: 15px;
-  border-radius: 10px;
-  background: #fff7ed;
-  border: 1px solid #fed7aa;
-  color: #9a3412;
-  font-size: 14px;
-  line-height: 1.5;
-}
+        .stat-label {
+            color: var(--muted);
+            font-size: 13px;
+            margin-top: 5px;
+        }
 
-@media (max-width: 600px) {
-  .container {
-    margin: 20px auto;
-  }
+        .section-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 18px;
+        }
 
-  .card {
-    padding: 22px;
-  }
+        .section-title h2 {
+            margin: 0;
+            font-size: 20px;
+        }
 
-  .stats {
-    grid-template-columns: 1fr;
-  }
-}
-</style>
+        .domain-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .domain-card {
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            overflow: hidden;
+            background: rgba(0, 0, 0, .15);
+        }
+
+        .domain-header {
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            background: rgba(255, 255, 255, .05);
+        }
+
+        .domain-title {
+            font-weight: 700;
+        }
+
+        .domain-count {
+            color: var(--muted);
+            font-size: 12px;
+            margin-left: 6px;
+        }
+
+        .domain-list {
+            height: 180px;
+            overflow-y: auto;
+            padding: 13px 15px;
+            font-family: Consolas, monospace;
+            font-size: 13px;
+            line-height: 1.7;
+            color: #cbd5e1;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .domain-list::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .domain-list::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 10px;
+        }
+
+        .results textarea {
+            width: 100%;
+            height: 350px;
+            resize: vertical;
+            background: rgba(0, 0, 0, .25);
+            color: #dbeafe;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 15px;
+            font-family: Consolas, monospace;
+            font-size: 13px;
+            outline: none;
+        }
+
+        .results-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .notice {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 12px;
+            background: rgba(249, 115, 22, .08);
+            border: 1px solid rgba(249, 115, 22, .2);
+            color: #fdba74;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        @media(max-width:800px) {
+
+            .settings,
+            .domain-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 30px;
+            }
+        }
+
+        @media(max-width:500px) {
+
+            .card {
+                padding: 20px;
+            }
+
+            .container {
+                padding: 20px 12px;
+            }
+        }
+    </style>
 </head>
 
 <body>
 
-<div class="container">
+    <div class="container">
 
-<div class="card">
+        <header class="app-header">
 
-<h1>Email Address Extractor</h1>
+            <div class="logo">✉</div>
 
-<p class="description">
-Connect your Gmail account and extract email addresses from complete raw email messages.
-</p>
+            <h1>MailScope</h1>
 
-<div class="connection-buttons">
+            <div class="subtitle">
+                Email Address Intelligence & ISP Domain Extractor
+            </div>
 
-<button
+        </header>
+
+
+        <!-- CONNECTION -->
+
+        <div class="card">
+
+            <div class="connection-buttons">
+
+                <button
 class="gmail-btn"
 id="connectBtn"
 onclick="connectGmail()">
 Connect Gmail
 </button>
 
-<button
+                <button
 class="disconnect-btn"
 id="disconnectBtn"
 onclick="disconnectGmail()"
@@ -298,298 +417,174 @@ style="display:none;">
 Disconnect
 </button>
 
-</div>
+            </div>
 
-<div class="settings-row">
 
-<label for="maxMessages">
-Max messages to scan:
+            <!-- DATE + MESSAGE OPTIONS -->
+
+            <div class="settings">
+
+                <div class="setting-card">
+
+                    <label>
+Date From
 </label>
 
-<input
+                    <input
+type="date"
+id="dateFrom">
+
+                </div>
+
+
+                <div class="setting-card">
+
+                    <label>
+Date To
+</label>
+
+                    <input
+type="date"
+id="dateTo">
+
+                </div>
+
+
+                <div class="setting-card">
+
+                    <label>
+Maximum Messages
+</label>
+
+                    <input
 type="number"
 id="maxMessages"
 value="1000"
-min="50"
+min="1"
 max="10000"
-step="50">
+step="100">
 
-</div>
+                </div>
 
-<div class="status-box">
 
-<div class="status-title">
-Connection Status
-</div>
+                <div class="setting-card">
 
-<div id="status">
-Not connected
-</div>
+                    <label>
+Date Search Mode
+</label>
 
-<div
-class="progress-wrap"
-id="progressWrap">
+                    <select
+id="dateMode"
+style="
+width:100%;
+background:rgba(0,0,0,.25);
+color:white;
+border:1px solid rgba(255,255,255,.12);
+border-radius:9px;
+padding:11px;
+">
 
-<div
-class="progress-bar"
-id="progressBar">
-</div>
+<option value="between">
+Selected Date Range
+</option>
 
-</div>
+<option value="from">
+From Date Onwards
+</option>
 
-</div>
+<option value="to">
+Up To Date
+</option>
 
-<div class="stats">
+<option value="all">
+All Available Messages
+</option>
 
-<div class="stat">
+</select>
 
-<div
-class="stat-number"
-id="messageCount">
-0
-</div>
+                </div>
 
-<div class="stat-label">
-Messages Scanned
-</div>
+            </div>
 
-</div>
 
-<div class="stat">
+            <div class="status-box">
 
-<div
-class="stat-number"
-id="uniqueCount">
-0
-</div>
+                <div class="status-title">
+                    Connection Status
+                </div>
 
-<div class="stat-label">
-Total Unique Email Addresses
-</div>
+                <div id="status">
+                    Not connected
+                </div>
 
-</div>
+                <div class="progress-wrap" id="progressWrap">
 
-</div>
+                    <div class="progress-bar" id="progressBar">
+                    </div>
 
+                </div>
 
-<!-- DOMAIN RESULTS -->
+            </div>
 
-<div class="domain-section">
 
-<h2>Email Domain Categories</h2>
+            <div class="stats">
 
+                <div class="stat">
 
-<div class="domain-card">
+                    <div class="stat-number" id="messageCount">
+                        0
+                    </div>
 
-<div class="domain-header">
+                    <div class="stat-label">
+                        Messages Scanned
+                    </div>
 
-<div>
-<span class="domain-title">
-Google Email Domains
-</span>
+                </div>
 
-<span
-class="domain-count"
-id="googleCount">
-0
-</span>
-</div>
 
-<button
-class="export-small"
-onclick="exportCategory('Google Email Domains')">
-Export
-</button>
+                <div class="stat">
 
-</div>
+                    <div class="stat-number" id="uniqueCount">
+                        0
+                    </div>
 
-<div
-class="domain-list"
-id="googleList">
-No addresses found.
-</div>
+                    <div class="stat-label">
+                        Unique Addresses
+                    </div>
 
-</div>
+                </div>
 
 
-<div class="domain-card">
+                <div class="stat">
 
-<div class="domain-header">
+                    <div class="stat-number" id="domainCount">
+                        0
+                    </div>
 
-<div>
-<span class="domain-title">
-Yahoo Email Domains
-</span>
+                    <div class="stat-label">
+                        Domains Found
+                    </div>
 
-<span
-class="domain-count"
-id="yahooCount">
-0
-</span>
-</div>
+                </div>
 
-<button
-class="export-small"
-onclick="exportCategory('Yahoo Email Domains')">
-Export
-</button>
+            </div>
 
-</div>
+        </div>
 
-<div
-class="domain-list"
-id="yahooList">
-No addresses found.
-</div>
 
-</div>
+        <!-- ISP CATEGORIES -->
 
+        <div class="card">
 
-<div class="domain-card">
+            <div class="section-title">
 
-<div class="domain-header">
+                <h2>
+                    ISP Email Domains
+                </h2>
 
-<div>
-<span class="domain-title">
-AOL Email Domains
-</span>
+                <div class="results-actions">
 
-<span
-class="domain-count"
-id="aolCount">
-0
-</span>
-</div>
-
-<button
-class="export-small"
-onclick="exportCategory('AOL Email Domains')">
-Export
-</button>
-
-</div>
-
-<div
-class="domain-list"
-id="aolList">
-No addresses found.
-</div>
-
-</div>
-
-
-<div class="domain-card">
-
-<div class="domain-header">
-
-<div>
-<span class="domain-title">
-Microsoft Email Domains
-</span>
-
-<span
-class="domain-count"
-id="microsoftCount">
-0
-</span>
-</div>
-
-<button
-class="export-small"
-onclick="exportCategory('Microsoft Email Domains')">
-Export
-</button>
-
-</div>
-
-<div
-class="domain-list"
-id="microsoftList">
-No addresses found.
-</div>
-
-</div>
-
-
-<div class="domain-card">
-
-<div class="domain-header">
-
-<div>
-<span class="domain-title">
-AT&amp;T Email Domains
-</span>
-
-<span
-class="domain-count"
-id="attCount">
-0
-</span>
-</div>
-
-<button
-class="export-small"
-onclick="exportCategory('AT&T Email Domains')">
-Export
-</button>
-
-</div>
-
-<div
-class="domain-list"
-id="attList">
-No addresses found.
-</div>
-
-</div>
-
-
-<div class="domain-card">
-
-<div class="domain-header">
-
-<div>
-<span class="domain-title">
-Other Domains
-</span>
-
-<span
-class="domain-count"
-id="otherCount">
-0
-</span>
-</div>
-
-<button
-class="export-small"
-onclick="exportCategory('Other Domains')">
-Export
-</button>
-
-</div>
-
-<div
-class="domain-list"
-id="otherList">
-No addresses found.
-</div>
-
-</div>
-
-</div>
-
-
-<!-- ALL RESULTS -->
-
-<div class="results">
-
-<div class="results-header">
-
-<h2>All Email Addresses</h2>
-
-<div>
-
-<button
+                    <button
 class="extract-btn"
 id="extractBtn"
 onclick="extractAddresses()"
@@ -597,54 +592,272 @@ disabled>
 Extract Addresses
 </button>
 
-<button
+                    <button
+class="copy-btn"
+onclick="copyAll()">
+Copy All
+</button>
+
+                    <button
 class="export-btn"
 onclick="exportCSV()">
 Export All
 </button>
 
-</div>
+                </div>
 
-</div>
+            </div>
 
-<textarea
+
+            <div class="domain-grid">
+
+
+                <div class="domain-card">
+
+                    <div class="domain-header">
+
+                        <div>
+                            <span class="domain-title">
+Google
+</span>
+
+                            <span
+class="domain-count"
+id="googleCount">
+0
+</span>
+                        </div>
+
+                        <button
+class="copy-btn small-btn"
+onclick="copyCategory('Google Email Domains')">
+Copy
+</button>
+
+                    </div>
+
+                    <div class="domain-list" id="googleList">
+                        No addresses found.
+                    </div>
+
+                </div>
+
+
+                <div class="domain-card">
+
+                    <div class="domain-header">
+
+                        <div>
+                            <span class="domain-title">
+Yahoo
+</span>
+
+                            <span
+class="domain-count"
+id="yahooCount">
+0
+</span>
+                        </div>
+
+                        <button
+class="copy-btn small-btn"
+onclick="copyCategory('Yahoo Email Domains')">
+Copy
+</button>
+
+                    </div>
+
+                    <div class="domain-list" id="yahooList">
+                        No addresses found.
+                    </div>
+
+                </div>
+
+
+                <div class="domain-card">
+
+                    <div class="domain-header">
+
+                        <div>
+                            <span class="domain-title">
+AOL
+</span>
+
+                            <span
+class="domain-count"
+id="aolCount">
+0
+</span>
+                        </div>
+
+                        <button
+class="copy-btn small-btn"
+onclick="copyCategory('AOL Email Domains')">
+Copy
+</button>
+
+                    </div>
+
+                    <div class="domain-list" id="aolList">
+                        No addresses found.
+                    </div>
+
+                </div>
+
+
+                <div class="domain-card">
+
+                    <div class="domain-header">
+
+                        <div>
+                            <span class="domain-title">
+Microsoft
+</span>
+
+                            <span
+class="domain-count"
+id="microsoftCount">
+0
+</span>
+                        </div>
+
+                        <button
+class="copy-btn small-btn"
+onclick="copyCategory('Microsoft Email Domains')">
+Copy
+</button>
+
+                    </div>
+
+                    <div class="domain-list" id="microsoftList">
+                        No addresses found.
+                    </div>
+
+                </div>
+
+
+                <div class="domain-card">
+
+                    <div class="domain-header">
+
+                        <div>
+                            <span class="domain-title">
+AT&amp;T
+</span>
+
+                            <span
+class="domain-count"
+id="attCount">
+0
+</span>
+                        </div>
+
+                        <button
+class="copy-btn small-btn"
+onclick="copyCategory('AT&T Email Domains')">
+Copy
+</button>
+
+                    </div>
+
+                    <div class="domain-list" id="attList">
+                        No addresses found.
+                    </div>
+
+                </div>
+
+
+                <div class="domain-card">
+
+                    <div class="domain-header">
+
+                        <div>
+                            <span class="domain-title">
+Other Domains
+</span>
+
+                            <span
+class="domain-count"
+id="otherCount">
+0
+</span>
+                        </div>
+
+                        <button
+class="copy-btn small-btn"
+onclick="copyCategory('Other Domains')">
+Copy
+</button>
+
+                    </div>
+
+                    <div class="domain-list" id="otherList">
+                        No addresses found.
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ALL EMAILS -->
+
+        <div class="card results">
+
+            <div class="section-title">
+
+                <h2>
+                    All Extracted Email Addresses
+                </h2>
+
+                <div class="results-actions">
+
+                    <button
+class="copy-btn"
+onclick="copyAll()">
+Copy to Clipboard
+</button>
+
+                    <button
+class="export-btn"
+onclick="exportCSV()">
+Export CSV
+</button>
+
+                </div>
+
+            </div>
+
+            <textarea
 id="emailResults"
 readonly
-placeholder="Unique email addresses will appear here..."></textarea>
+placeholder="Extracted email addresses will appear here..."></textarea>
 
-</div>
-
-
-<div class="notice">
-
-<strong>Security:</strong>
-This page uses Google's official OAuth sign-in.
-Your Gmail password is never seen or stored by this page.
-The application requests read-only Gmail access.
-
-<br><br>
-
-<strong>Extraction:</strong>
-Each Gmail message is downloaded in RAW format.
-The complete decoded message is scanned for email addresses.
-
-<br><br>
-
-<strong>Domain Categories:</strong>
-Google, Yahoo, AOL, Microsoft, AT&amp;T and Other domains are
-automatically separated after extraction.
-
-</div>
-
-</div>
-
-</div>
+        </div>
 
 
-<script>
+        <div class="notice">
 
-// ============================================================
-// CONFIGURATION
+            <strong>How it works:</strong>
+            Select a date range, connect Gmail and scan the matching messages.
+            The application reads each complete RAW Gmail message and extracts
+            unique email addresses from the message content.
+
+            <br><br>
+
+            <strong>Supported ISP categories:</strong>
+            Google, Yahoo, AOL, Microsoft, AT&amp;T and Other Domains.
+
+        </div>
+
+    </div>
+
+
+    <script>
+        // ============================================================
+// CONFIG
 // ============================================================
 
 const CLIENT_ID =
@@ -655,7 +868,7 @@ const SCOPE =
 
 
 // ============================================================
-// GLOBAL VARIABLES
+// GLOBALS
 // ============================================================
 
 let accessToken = null;
@@ -674,7 +887,7 @@ const EMAIL_REGEX =
 
 
 // ============================================================
-// EMAIL DOMAIN GROUPS
+// ISP DOMAINS
 // ============================================================
 
 const EMAIL_DOMAIN_GROUPS = {
@@ -807,7 +1020,7 @@ if (
 ) {
 
 setStatus(
-"Google sign-in script hasn't loaded yet. Please wait a moment and try again."
+"Google sign-in is still loading. Please wait."
 );
 
 return;
@@ -858,6 +1071,10 @@ document.getElementById(
 "uniqueCount"
 ).textContent = "0";
 
+document.getElementById(
+"domainCount"
+).textContent = "0";
+
 setStatus("Not connected");
 
 document.getElementById(
@@ -882,16 +1099,13 @@ document.getElementById(
 async function gmailFetch(url) {
 
 const res = await fetch(
-
 url,
-
 {
 headers: {
 Authorization:
 "Bearer " + accessToken
 }
 }
-
 );
 
 
@@ -911,7 +1125,7 @@ throw new Error("Unauthorized");
 if (res.status === 429) {
 
 await new Promise(
-r => setTimeout(r, 2000)
+resolve => setTimeout(resolve, 2000)
 );
 
 return gmailFetch(url);
@@ -922,8 +1136,7 @@ return gmailFetch(url);
 if (!res.ok) {
 
 throw new Error(
-"Gmail API error: " +
-res.status
+"Gmail API error: " + res.status
 );
 
 }
@@ -934,10 +1147,161 @@ return res.json();
 
 
 // ============================================================
+// DATE FORMAT FOR GMAIL SEARCH
+// ============================================================
+
+function gmailDate(dateString) {
+
+if (!dateString) {
+return "";
+}
+
+const parts =
+dateString.split("-");
+
+return `${parts[0]}/${parts[1]}/${parts[2]}`;
+
+}
+
+
+// ============================================================
+// BUILD GMAIL SEARCH QUERY
+// ============================================================
+
+function buildDateQuery() {
+
+const mode =
+document.getElementById(
+"dateMode"
+).value;
+
+const from =
+document.getElementById(
+"dateFrom"
+).value;
+
+const to =
+document.getElementById(
+"dateTo"
+).value;
+
+let query = "";
+
+
+if (mode === "all") {
+
+return "";
+
+}
+
+
+if (mode === "from") {
+
+if (!from) {
+
+alert(
+"Please select a From Date."
+);
+
+return null;
+
+}
+
+query =
+`after:${gmailDate(from)}`;
+
+}
+
+
+else if (mode === "to") {
+
+if (!to) {
+
+alert(
+"Please select a To Date."
+);
+
+return null;
+
+}
+
+const nextDay =
+new Date(to + "T00:00:00");
+
+nextDay.setDate(
+nextDay.getDate() + 1
+);
+
+const year =
+nextDay.getFullYear();
+
+const month =
+String(
+nextDay.getMonth() + 1
+).padStart(2,"0");
+
+const day =
+String(
+nextDay.getDate()
+).padStart(2,"0");
+
+query =
+`before:${year}/${month}/${day}`;
+
+}
+
+
+else {
+
+if (!from || !to) {
+
+alert(
+"Please select both From Date and To Date."
+);
+
+return null;
+
+}
+
+const nextDay =
+new Date(to + "T00:00:00");
+
+nextDay.setDate(
+nextDay.getDate() + 1
+);
+
+const year =
+nextDay.getFullYear();
+
+const month =
+String(
+nextDay.getMonth() + 1
+).padStart(2,"0");
+
+const day =
+String(
+nextDay.getDate()
+).padStart(2,"0");
+
+query =
+`after:${gmailDate(from)} before:${year}/${month}/${day}`;
+
+}
+
+
+return query;
+
+}
+
+
+// ============================================================
 // LIST MESSAGE IDS
 // ============================================================
 
-async function listMessageIds(maxTotal) {
+async function listMessageIds(
+maxTotal,
+query
+) {
 
 let ids = [];
 
@@ -954,6 +1318,13 @@ maxTotal - ids.length
 let url =
 `https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=${batchSize}`;
 
+if (query) {
+
+url +=
+`&q=${encodeURIComponent(query)}`;
+
+}
+
 if (pageToken) {
 
 url +=
@@ -969,7 +1340,7 @@ if (data.messages) {
 ids =
 ids.concat(
 data.messages.map(
-m => m.id
+message => message.id
 )
 );
 
@@ -1031,14 +1402,11 @@ binary.charCodeAt(i);
 try {
 
 return new TextDecoder(
-"utf-8",
-{
-fatal: false
-}
+"utf-8"
 ).decode(bytes);
 
 }
-catch (e) {
+catch (error) {
 
 return binary;
 
@@ -1048,68 +1416,13 @@ return binary;
 
 
 // ============================================================
-// GET DOMAIN
-// ============================================================
-
-function getDomain(email) {
-
-const parts =
-email
-.toLowerCase()
-.split("@");
-
-if (parts.length !== 2) {
-
-return "";
-
-}
-
-return parts[1];
-
-}
-
-
-// ============================================================
-// CLASSIFY EMAIL
-// ============================================================
-
-function classifyEmail(email) {
-
-const domain =
-getDomain(email);
-
-for (
-const [group, domains]
-of Object.entries(
-EMAIL_DOMAIN_GROUPS
-)
-) {
-
-if (
-domains.includes(domain)
-) {
-
-return group;
-
-}
-
-}
-
-return "Other Domains";
-
-}
-
-
-// ============================================================
-// EXTRACT EMAILS FROM TEXT
+// EXTRACT EMAILS
 // ============================================================
 
 function extractEmailsFromText(text) {
 
 if (!text) {
-
 return;
-
 }
 
 const matches =
@@ -1118,14 +1431,11 @@ EMAIL_REGEX
 );
 
 if (!matches) {
-
 return;
-
 }
 
 for (
-const email
-of matches
+const email of matches
 ) {
 
 let cleanEmail =
@@ -1156,7 +1466,7 @@ cleanEmail
 
 
 // ============================================================
-// FETCH RAW MESSAGE
+// RAW MESSAGE
 // ============================================================
 
 async function fetchRawMessage(id) {
@@ -1188,25 +1498,16 @@ async function processMessage(id) {
 
 try {
 
-const rawMessage =
+const raw =
 await fetchRawMessage(id);
 
-if (!rawMessage) {
-
-return;
-
-}
-
-extractEmailsFromText(
-rawMessage
-);
+extractEmailsFromText(raw);
 
 }
 catch (error) {
 
 console.error(
-"Failed to process message:",
-id,
+"Message processing error:",
 error
 );
 
@@ -1216,7 +1517,7 @@ error
 
 
 // ============================================================
-// FETCH MESSAGE BATCH
+// MESSAGE WORKERS
 // ============================================================
 
 async function fetchMessageBatch(ids) {
@@ -1231,16 +1532,15 @@ while (
 index < ids.length
 ) {
 
-const currentIndex =
+const current =
 index++;
 
-const id =
-ids[currentIndex];
-
-await processMessage(id);
+await processMessage(
+ids[current]
+);
 
 updateProgress(
-currentIndex + 1,
+current + 1,
 ids.length
 );
 
@@ -1268,7 +1568,47 @@ workers
 
 
 // ============================================================
-// CATEGORIZE ALL EMAILS
+// CLASSIFICATION
+// ============================================================
+
+function classifyEmail(email) {
+
+const parts =
+email.toLowerCase().split("@");
+
+if (parts.length !== 2) {
+
+return "Other Domains";
+
+}
+
+const domain =
+parts[1];
+
+for (
+const [category, domains]
+of Object.entries(
+EMAIL_DOMAIN_GROUPS
+)
+) {
+
+if (
+domains.includes(domain)
+) {
+
+return category;
+
+}
+
+}
+
+return "Other Domains";
+
+}
+
+
+// ============================================================
+// CATEGORIZE
 // ============================================================
 
 function categorizeEmails() {
@@ -1295,7 +1635,7 @@ updateCategoryDisplay();
 
 
 // ============================================================
-// RESET CATEGORIES
+// RESET
 // ============================================================
 
 function resetCategories() {
@@ -1319,51 +1659,49 @@ updateCategoryDisplay();
 
 
 // ============================================================
-// UPDATE CATEGORY DISPLAY
+// DISPLAY CATEGORIES
 // ============================================================
 
 function updateCategoryDisplay() {
 
-const displayMap = {
+const map = {
 
-"Google Email Domains": {
-list: "googleList",
-count: "googleCount"
-},
+"Google Email Domains": [
+"googleList",
+"googleCount"
+],
 
-"Yahoo Email Domains": {
-list: "yahooList",
-count: "yahooCount"
-},
+"Yahoo Email Domains": [
+"yahooList",
+"yahooCount"
+],
 
-"AOL Email Domains": {
-list: "aolList",
-count: "aolCount"
-},
+"AOL Email Domains": [
+"aolList",
+"aolCount"
+],
 
-"Microsoft Email Domains": {
-list: "microsoftList",
-count: "microsoftCount"
-},
+"Microsoft Email Domains": [
+"microsoftList",
+"microsoftCount"
+],
 
-"AT&T Email Domains": {
-list: "attList",
-count: "attCount"
-},
+"AT&T Email Domains": [
+"attList",
+"attCount"
+],
 
-"Other Domains": {
-list: "otherList",
-count: "otherCount"
-}
+"Other Domains": [
+"otherList",
+"otherCount"
+]
 
 };
 
 
 for (
-const [category, elements]
-of Object.entries(
-displayMap
-)
+const [category, ids]
+of Object.entries(map)
 ) {
 
 const emails =
@@ -1376,16 +1714,16 @@ category
 .sort();
 
 document.getElementById(
-elements.count
-).textContent =
-emails.length;
-
-document.getElementById(
-elements.list
+ids[0]
 ).textContent =
 emails.length
 ? emails.join("\n")
 : "No addresses found.";
+
+document.getElementById(
+ids[1]
+).textContent =
+emails.length;
 
 }
 
@@ -1411,7 +1749,18 @@ document.getElementById(
 ).textContent =
 emailAddresses.size;
 
-const pct =
+document.getElementById(
+"domainCount"
+).textContent =
+new Set(
+Array
+.from(emailAddresses)
+.map(
+email => email.split("@")[1]
+)
+).size;
+
+const percent =
 total
 ? Math.round(
 (done / total) * 100
@@ -1421,15 +1770,13 @@ total
 document.getElementById(
 "progressBar"
 ).style.width =
-pct + "%";
+percent + "%";
 
 document.getElementById(
 "emailResults"
 ).value =
 Array
-.from(
-emailAddresses
-)
+.from(emailAddresses)
 .sort()
 .join("\n");
 
@@ -1452,17 +1799,42 @@ return;
 
 }
 
-emailAddresses.clear();
-
-resetCategories();
-
-const maxTotal =
+const maxMessages =
 parseInt(
 document.getElementById(
 "maxMessages"
 ).value,
 10
 ) || 1000;
+
+const query =
+buildDateQuery();
+
+if (query === null) {
+
+return;
+
+}
+
+emailAddresses.clear();
+
+resetCategories();
+
+document.getElementById(
+"emailResults"
+).value = "";
+
+document.getElementById(
+"messageCount"
+).textContent = "0";
+
+document.getElementById(
+"uniqueCount"
+).textContent = "0";
+
+document.getElementById(
+"domainCount"
+).textContent = "0";
 
 document.getElementById(
 "extractBtn"
@@ -1476,43 +1848,49 @@ document.getElementById(
 "progressBar"
 ).style.width = "0%";
 
-document.getElementById(
-"emailResults"
-).value = "";
-
-setStatus(
-"Fetching message list..."
-);
 
 try {
 
+setStatus(
+"Searching Gmail messages..."
+);
+
 const ids =
 await listMessageIds(
-maxTotal
+maxMessages,
+query
 );
+
+if (!ids.length) {
 
 setStatus(
-`Reading complete raw messages from ${ids.length} emails...`
+"No messages found for the selected date range."
 );
 
-await fetchMessageBatch(
-ids
+return;
+
+}
+
+setStatus(
+`Reading ${ids.length} complete raw messages...`
 );
+
+await fetchMessageBatch(ids);
 
 categorizeEmails();
 
 setStatus(
-`Done. Scanned ${ids.length} messages and found ${emailAddresses.size} unique email addresses.`
+`Completed. ${emailAddresses.size} unique email addresses found.`
 );
 
 }
-catch (e) {
+catch (error) {
 
-console.error(e);
+console.error(error);
 
 setStatus(
-"Error during extraction: " +
-e.message
+"Extraction error: " +
+error.message
 );
 
 }
@@ -1528,17 +1906,119 @@ document.getElementById(
 
 
 // ============================================================
-// EXPORT ALL EMAILS
+// COPY ALL
+// ============================================================
+
+async function copyAll() {
+
+const emails =
+Array
+.from(emailAddresses)
+.sort();
+
+if (!emails.length) {
+
+alert(
+"No email addresses available."
+);
+
+return;
+
+}
+
+await copyText(
+emails.join("\n")
+);
+
+}
+
+
+// ============================================================
+// COPY CATEGORY
+// ============================================================
+
+async function copyCategory(category) {
+
+const emails =
+Array
+.from(
+categorizedEmails[
+category
+] || []
+)
+.sort();
+
+if (!emails.length) {
+
+alert(
+"No email addresses available in " +
+category
+);
+
+return;
+
+}
+
+await copyText(
+emails.join("\n")
+);
+
+}
+
+
+// ============================================================
+// CLIPBOARD
+// ============================================================
+
+async function copyText(text) {
+
+try {
+
+await navigator.clipboard.writeText(text);
+
+setStatus(
+"Email addresses copied to clipboard."
+);
+
+}
+catch (error) {
+
+const textarea =
+document.createElement("textarea");
+
+textarea.value = text;
+
+document.body.appendChild(
+textarea
+);
+
+textarea.select();
+
+document.execCommand("copy");
+
+document.body.removeChild(
+textarea
+);
+
+setStatus(
+"Email addresses copied to clipboard."
+);
+
+}
+
+}
+
+
+// ============================================================
+// EXPORT ALL
 // ============================================================
 
 function exportCSV() {
 
-if (
-emailAddresses.size === 0
-) {
+if (!emailAddresses.size) {
 
 alert(
-"No email addresses available. Run Extract Addresses first."
+"No email addresses available."
 );
 
 return;
@@ -1554,7 +2034,7 @@ const csv =
 "Email Address\n" +
 emails.join("\n");
 
-downloadCSV(
+downloadFile(
 csv,
 "all-email-addresses.csv"
 );
@@ -1563,10 +2043,10 @@ csv,
 
 
 // ============================================================
-// EXPORT CATEGORY
+// DOWNLOAD CATEGORY
 // ============================================================
 
-function exportCategory(category) {
+function downloadCategory(category) {
 
 const emails =
 Array
@@ -1577,13 +2057,7 @@ category
 )
 .sort();
 
-if (emails.length === 0) {
-
-alert(
-"No email addresses found in " +
-category +
-"."
-);
+if (!emails.length) {
 
 return;
 
@@ -1593,33 +2067,29 @@ const csv =
 "Email Address\n" +
 emails.join("\n");
 
-const filename =
+downloadFile(
+csv,
 category
 .toLowerCase()
-.replace(/[^a-z0-9]+/g, "-")
-.replace(/^-|-$/g, "") +
-".csv";
-
-downloadCSV(
-csv,
-filename
+.replace(/[^a-z0-9]+/g,"-") +
+".csv"
 );
 
 }
 
 
 // ============================================================
-// DOWNLOAD CSV
+// GENERIC DOWNLOAD
 // ============================================================
 
-function downloadCSV(
-csv,
+function downloadFile(
+content,
 filename
 ) {
 
 const blob =
 new Blob(
-[csv],
+[content],
 {
 type:
 "text/csv;charset=utf-8;"
@@ -1632,14 +2102,11 @@ blob
 );
 
 const link =
-document.createElement(
-"a"
-);
+document.createElement("a");
 
 link.href = url;
 
-link.download =
-filename;
+link.download = filename;
 
 document.body.appendChild(
 link
@@ -1657,7 +2124,65 @@ url
 
 }
 
-</script>
+
+// ============================================================
+// DEFAULT DATES
+// ============================================================
+
+document.getElementById(
+"dateMode"
+).addEventListener(
+"change",
+function() {
+
+const mode = this.value;
+
+const from =
+document.getElementById("dateFrom");
+
+const to =
+document.getElementById("dateTo");
+
+if (mode === "all") {
+
+from.disabled = true;
+
+to.disabled = true;
+
+}
+else if (mode === "from") {
+
+from.disabled = false;
+
+to.disabled = true;
+
+}
+else if (mode === "to") {
+
+from.disabled = true;
+
+to.disabled = false;
+
+}
+else {
+
+from.disabled = false;
+
+to.disabled = false;
+
+}
+
+}
+);
+
+document.getElementById(
+"dateMode"
+).dispatchEvent(
+new Event("change")
+);
+
+    </script>
 
 </body>
+
 </html>
