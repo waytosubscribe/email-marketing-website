@@ -1318,48 +1318,134 @@ let emailAddresses = new Set();
 // ============================================================
 
 const EMAIL_REGEX =
-/[A-Za-z0-9.!#$%&'*+/=?^_`{|}~-]+@[A-Za-z0-9.-]+/g;
+/[^\s<>"()[\],;:]+@[A-Za-z0-9.-]+/g;
 
 function isValidEmailAddress(email) {
 
-if (!email || typeof email !== "string") return false;
-if (/\s/.test(email)) return false;
-email = email.trim();
-if (email.length > 320) return false;
+    if (!email || typeof email !== "string") {
+        return false;
+    }
 
-const atIndex = email.indexOf("@");
-if (atIndex <= 0 || atIndex !== email.lastIndexOf("@")) return false;
+    // Rule 9: no whitespace anywhere.
+    if (/\s/.test(email)) {
+        return false;
+    }
 
-const localPart = email.slice(0, atIndex);
-const domainPart = email.slice(atIndex + 1);
-if (!localPart || !domainPart) return false;
+    email = email.trim().toLowerCase();
 
-if (localPart.length > 64) return false;
-if (!/^[A-Za-z0-9._+-]+$/.test(localPart)) return false;
-if (localPart.startsWith(".") || localPart.endsWith(".") || localPart.includes("..")) return false;
+    // Rule 8: total address length must not exceed 320 characters.
+    if (email.length > 320) {
+        return false;
+    }
 
-if (!/^[A-Za-z0-9.-]+$/.test(domainPart)) return false;
-if (domainPart.startsWith(".") || domainPart.endsWith(".") || domainPart.includes("..")) return false;
-if (domainPart.length > 255) return false;
+    // Exactly one @ and both sides must exist.
+    const atIndex = email.indexOf("@");
+    if (
+        atIndex <= 0 ||
+        atIndex !== email.lastIndexOf("@") ||
+        atIndex === email.length - 1
+    ) {
+        return false;
+    }
 
-const domainLabels = domainPart.split(".");
-if (domainLabels.length < 2) return false;
+    const localPart = email.slice(0, atIndex);
+    const domainPart = email.slice(atIndex + 1);
 
-for (const label of domainLabels) {
-    if (label.length < 1 || label.length > 63) return false;
-    if (label.startsWith("-") || label.endsWith("-")) return false;
-    if (!/^[A-Za-z0-9-]+$/.test(label)) return false;
+    // Rule 3: local part max 64 characters.
+    if (localPart.length > 64) {
+        return false;
+    }
+
+    // Rules 1 & 2: only A-Z/a-z/0-9/./_/-/+ are permitted.
+    // This automatically rejects ! # $ % & ' * / = ? ^ ` { | } ~ and all others.
+    if (!/^[A-Za-z0-9._+-]+$/.test(localPart)) {
+        return false;
+    }
+
+    // Rule 4: punctuation cannot be at the beginning/end,
+    // and periods cannot occur consecutively.
+    if (
+        !/^[A-Za-z0-9]/.test(localPart) ||
+        !/[A-Za-z0-9]$/.test(localPart) ||
+        localPart.includes("..")
+    ) {
+        return false;
+    }
+
+    // Rule 5: domain may contain only letters, numbers, hyphens and dots.
+    if (!/^[A-Za-z0-9.-]+$/.test(domainPart)) {
+        return false;
+    }
+
+    // Basic domain structure checks.
+    if (
+        domainPart.startsWith(".") ||
+        domainPart.endsWith(".") ||
+        domainPart.includes("..")
+    ) {
+        return false;
+    }
+
+    // Rule 6: domain max 255 characters.
+    if (domainPart.length > 255) {
+        return false;
+    }
+
+    const domainLabels = domainPart.split(".");
+
+    // A final extension/TLD is required.
+    if (domainLabels.length < 2) {
+        return false;
+    }
+
+    for (const label of domainLabels) {
+
+        // Rule 6: each domain label max 63 characters.
+        if (label.length < 1 || label.length > 63) {
+            return false;
+        }
+
+        // Hyphens cannot start/end a domain label.
+        if (
+            label.startsWith("-") ||
+            label.endsWith("-")
+        ) {
+            return false;
+        }
+    }
+
+    // Rule 7: final extension/TLD must contain at least 2 characters.
+    const tld = domainLabels[domainLabels.length - 1];
+    if (tld.length < 2) {
+        return false;
+    }
+
+    return true;
 }
 
-const tld = domainLabels[domainLabels.length - 1];
-if (tld.length < 2) return false;
+// Remove URLs before email extraction. This prevents email-looking
+// query parameters such as ?e=name@gmail.com from being treated as
+// actual email addresses.
+function removeUrlsForEmailExtraction(text) {
 
-return true;
+    if (!text || typeof text !== "string") {
+        return "";
+    }
+
+    return text
+        // Remove HTTP/HTTPS and protocol-relative URLs.
+        .replace(
+            /(?:https?:)?\/\/[^\s<>"']+/gi,
+            " "
+        )
+        // Remove the mailto scheme so a normal mailto address can still be extracted.
+        .replace(/\bmailto:/gi, " ");
 }
-
 
 // ============================================================
 // ISP DOMAINS
+// ============================================================
+
 // ============================================================
 
 const EMAIL_DOMAIN_GROUPS = {
@@ -1893,34 +1979,34 @@ return binary;
 
 function extractEmailsFromText(text) {
 
-if (!text || typeof text !== "string") {
-return;
-}
+    if (!text || typeof text !== "string") {
+        return;
+    }
 
-const matches = text.match(EMAIL_REGEX);
+    // Raw Gmail messages can contain normal email addresses inside
+    // HTML links and tracking URLs. Remove URLs first so values such as
+    // ?e=name@gmail.com are not mistaken for email addresses.
+    const searchableText = removeUrlsForEmailExtraction(text);
 
-if (!matches) {
-return;
-}
+    const matches = searchableText.match(EMAIL_REGEX);
 
-for (const email of matches) {
+    if (!matches) {
+        return;
+    }
 
-let cleanEmail = email
-.trim()
-.toLowerCase();
+    for (const email of matches) {
 
-cleanEmail = cleanEmail.replace(
-/[.,;:!?"'<>()[\]{}]+$/g,
-""
-);
+        const cleanEmail = email
+            .trim()
+            .toLowerCase()
+            .replace(/[.,;:!?"'<>()[\]{}]+$/g, "");
 
-if (!isValidEmailAddress(cleanEmail)) {
-continue;
-}
+        if (!isValidEmailAddress(cleanEmail)) {
+            continue;
+        }
 
-emailAddresses.add(cleanEmail);
-
-}
+        emailAddresses.add(cleanEmail);
+    }
 }
 
 // ============================================================
