@@ -376,349 +376,453 @@
                 padding: 20px 12px;
             }
         }
-    
-/* ============================================================
+
+        /* ============================================================
    MODERN UI REFRESH — VISUAL ONLY
    Core Gmail/API/extraction logic remains unchanged.
    ============================================================ */
-:root {
-    --bg: #f5f7fb;
-    --card: rgba(255,255,255,.86);
-    --card-light: rgba(248,250,252,.92);
-    --border: rgba(15,23,42,.09);
-    --text: #0f172a;
-    --muted: #64748b;
-    --blue: #2563eb;
-    --green: #16a34a;
-    --purple: #7c3aed;
-    --orange: #ea580c;
-    --red: #dc2626;
-    --shadow: 0 18px 55px rgba(15,23,42,.08);
-    --shadow-hover: 0 22px 70px rgba(37,99,235,.13);
-}
+        :root {
+            --bg: #f5f7fb;
+            --card: rgba(255, 255, 255, .86);
+            --card-light: rgba(248, 250, 252, .92);
+            --border: rgba(15, 23, 42, .09);
+            --text: #0f172a;
+            --muted: #64748b;
+            --blue: #2563eb;
+            --green: #16a34a;
+            --purple: #7c3aed;
+            --orange: #ea580c;
+            --red: #dc2626;
+            --shadow: 0 18px 55px rgba(15, 23, 42, .08);
+            --shadow-hover: 0 22px 70px rgba(37, 99, 235, .13);
+        }
 
-html { scroll-behavior: smooth; }
+        html {
+            scroll-behavior: smooth;
+        }
 
-body {
-    min-height: 100vh;
-    color: var(--text);
-    background:
-        radial-gradient(circle at 8% 5%, rgba(37,99,235,.11), transparent 28%),
-        radial-gradient(circle at 92% 18%, rgba(124,58,237,.10), transparent 27%),
-        linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
-    background-attachment: fixed;
-    transition: background .35s ease, color .35s ease;
-}
+        body {
+            min-height: 100vh;
+            color: var(--text);
+            background:
+                radial-gradient(circle at 8% 5%, rgba(37, 99, 235, .11), transparent 28%),
+                radial-gradient(circle at 92% 18%, rgba(124, 58, 237, .10), transparent 27%),
+                linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
+            background-attachment: fixed;
+            transition: background .35s ease, color .35s ease;
+        }
 
-body.dark-theme {
-    --bg: #070b14;
-    --card: rgba(15,23,42,.78);
-    --card-light: rgba(255,255,255,.055);
-    --border: rgba(255,255,255,.10);
-    --text: #f8fafc;
-    --muted: #94a3b8;
-    --shadow: 0 22px 70px rgba(0,0,0,.34);
-    background:
-        radial-gradient(circle at 12% 8%, rgba(37,99,235,.18), transparent 28%),
-        radial-gradient(circle at 88% 25%, rgba(124,58,237,.16), transparent 30%),
-        #070b14;
-}
+        body.dark-theme {
+            --bg: #070b14;
+            --card: rgba(15, 23, 42, .78);
+            --card-light: rgba(255, 255, 255, .055);
+            --border: rgba(255, 255, 255, .10);
+            --text: #f8fafc;
+            --muted: #94a3b8;
+            --shadow: 0 22px 70px rgba(0, 0, 0, .34);
+            background:
+                radial-gradient(circle at 12% 8%, rgba(37, 99, 235, .18), transparent 28%),
+                radial-gradient(circle at 88% 25%, rgba(124, 58, 237, .16), transparent 30%),
+                #070b14;
+        }
 
-.container {
-    max-width: 1240px;
-    padding: 28px 22px 70px;
-}
+        .container {
+            max-width: 1240px;
+            padding: 28px 22px 70px;
+        }
 
-.app-header {
-    position: relative;
-    padding: 24px 0 16px;
-    margin-bottom: 20px;
-}
+        .app-header {
+            position: relative;
+            padding: 24px 0 16px;
+            margin-bottom: 20px;
+        }
 
-.app-header::after {
-    content: "";
-    position: absolute;
-    left: 50%;
-    bottom: 0;
-    width: 92px;
-    height: 4px;
-    border-radius: 99px;
-    transform: translateX(-50%);
-    background: linear-gradient(90deg, #2563eb, #7c3aed);
-    animation: headerPulse 2.4s ease-in-out infinite;
-}
+        .app-header::after {
+            content: "";
+            position: absolute;
+            left: 50%;
+            bottom: 0;
+            width: 92px;
+            height: 4px;
+            border-radius: 99px;
+            transform: translateX(-50%);
+            background: linear-gradient(90deg, #2563eb, #7c3aed);
+            animation: headerPulse 2.4s ease-in-out infinite;
+        }
 
-@keyframes headerPulse {
-    0%,100% { opacity: .55; transform: translateX(-50%) scaleX(.8); }
-    50% { opacity: 1; transform: translateX(-50%) scaleX(1.15); }
-}
+        @keyframes headerPulse {
 
-.logo {
-    position: relative;
-    width: 76px;
-    height: 76px;
-    border-radius: 24px;
-    background: linear-gradient(135deg, #2563eb, #7c3aed);
-    box-shadow: 0 16px 45px rgba(37,99,235,.28);
-    font-size: 0;
-    overflow: visible;
-    animation: logoFloat 3s ease-in-out infinite;
-}
+            0%,
+            100% {
+                opacity: .55;
+                transform: translateX(-50%) scaleX(.8);
+            }
 
-.logo::before {
-    content: "✉";
-    position: absolute;
-    inset: 0;
-    display: grid;
-    place-items: center;
-    color: #fff;
-    font-size: 34px;
-    font-weight: 800;
-}
+            50% {
+                opacity: 1;
+                transform: translateX(-50%) scaleX(1.15);
+            }
+        }
 
-.logo::after {
-    content: "";
-    position: absolute;
-    inset: -7px;
-    border: 2px solid rgba(37,99,235,.25);
-    border-radius: 28px;
-    animation: logoRing 2s ease-out infinite;
-}
+        .logo {
+            position: relative;
+            width: 76px;
+            height: 76px;
+            border-radius: 24px;
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            box-shadow: 0 16px 45px rgba(37, 99, 235, .28);
+            font-size: 0;
+            overflow: visible;
+            animation: logoFloat 3s ease-in-out infinite;
+        }
 
-@keyframes logoFloat {
-    0%,100% { transform: translateY(0) rotate(0); }
-    50% { transform: translateY(-5px) rotate(-2deg); }
-}
-@keyframes logoRing {
-    0% { opacity: .65; transform: scale(.96); }
-    100% { opacity: 0; transform: scale(1.18); }
-}
+        .logo::before {
+            content: "✉";
+            position: absolute;
+            inset: 0;
+            display: grid;
+            place-items: center;
+            color: #fff;
+            font-size: 34px;
+            font-weight: 800;
+        }
 
-h1 {
-    margin-top: 4px;
-    font-size: clamp(34px, 5vw, 48px);
-    font-weight: 850;
-    letter-spacing: -1.8px;
-    background: linear-gradient(135deg, #0f172a, #2563eb 55%, #7c3aed);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-}
-.dark-theme h1 {
-    background: linear-gradient(135deg, #fff, #93c5fd 55%, #c4b5fd);
-    -webkit-background-clip: text;
-    background-clip: text;
-}
+        .logo::after {
+            content: "";
+            position: absolute;
+            inset: -7px;
+            border: 2px solid rgba(37, 99, 235, .25);
+            border-radius: 28px;
+            animation: logoRing 2s ease-out infinite;
+        }
 
-.subtitle {
-    font-size: 15px;
-    color: var(--muted);
-    letter-spacing: .1px;
-}
+        @keyframes logoFloat {
 
-.card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 24px;
-    padding: 26px;
-    box-shadow: var(--shadow);
-    margin-bottom: 18px;
-    backdrop-filter: blur(22px);
-    -webkit-backdrop-filter: blur(22px);
-    transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
-}
-.card:hover {
-    box-shadow: var(--shadow-hover);
-    border-color: rgba(37,99,235,.16);
-}
+            0%,
+            100% {
+                transform: translateY(0) rotate(0);
+            }
 
-.card:first-of-type {
-    position: relative;
-    overflow: hidden;
-}
-.card:first-of-type::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, #2563eb, #7c3aed, #06b6d4);
-}
+            50% {
+                transform: translateY(-5px) rotate(-2deg);
+            }
+        }
 
-.connection-buttons { gap: 10px; }
+        @keyframes logoRing {
+            0% {
+                opacity: .65;
+                transform: scale(.96);
+            }
 
-button {
-    min-height: 42px;
-    border-radius: 12px;
-    padding: 11px 17px;
-    box-shadow: 0 7px 18px rgba(15,23,42,.08);
-    letter-spacing: .05px;
-}
-button:hover {
-    box-shadow: 0 12px 26px rgba(37,99,235,.15);
-}
-button:active { transform: translateY(0) scale(.98); }
+            100% {
+                opacity: 0;
+                transform: scale(1.18);
+            }
+        }
 
-.gmail-btn { background: linear-gradient(135deg,#4285f4,#2563eb); }
-.disconnect-btn { background: linear-gradient(135deg,#ef4444,#b91c1c); }
-.extract-btn { background: linear-gradient(135deg,#2563eb,#4f46e5); }
-.export-btn { background: linear-gradient(135deg,#16a34a,#15803d); }
-.copy-btn { background: linear-gradient(135deg,#8b5cf6,#6d28d9); }
+        h1 {
+            margin-top: 4px;
+            font-size: clamp(34px, 5vw, 48px);
+            font-weight: 850;
+            letter-spacing: -1.8px;
+            background: linear-gradient(135deg, #0f172a, #2563eb 55%, #7c3aed);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
 
-.settings { gap: 13px; margin-top: 20px; }
+        .dark-theme h1 {
+            background: linear-gradient(135deg, #fff, #93c5fd 55%, #c4b5fd);
+            -webkit-background-clip: text;
+            background-clip: text;
+        }
 
-.setting-card {
-    background: var(--card-light);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 17px;
-    transition: border-color .2s ease, transform .2s ease;
-}
-.setting-card:hover {
-    transform: translateY(-2px);
-    border-color: rgba(37,99,235,.24);
-}
-.setting-card label {
-    font-weight: 700;
-    color: var(--muted);
-    letter-spacing: .2px;
-}
-input, select {
-    min-height: 44px;
-    color: var(--text) !important;
-    background: rgba(255,255,255,.72) !important;
-    border-color: var(--border) !important;
-    border-radius: 11px !important;
-    transition: box-shadow .2s ease, border-color .2s ease;
-}
-.dark-theme input, .dark-theme select {
-    background: rgba(0,0,0,.25) !important;
-}
-input:focus, select:focus {
-    border-color: rgba(37,99,235,.65) !important;
-    box-shadow: 0 0 0 4px rgba(37,99,235,.11) !important;
-}
+        .subtitle {
+            font-size: 15px;
+            color: var(--muted);
+            letter-spacing: .1px;
+        }
 
-.status-box {
-    background: var(--card-light);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-}
-.status-title { color: var(--text); }
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 26px;
+            box-shadow: var(--shadow);
+            margin-bottom: 18px;
+            backdrop-filter: blur(22px);
+            -webkit-backdrop-filter: blur(22px);
+            transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+        }
 
-.stats { gap: 12px; }
-.stat {
-    position: relative;
-    overflow: hidden;
-    padding: 19px;
-    border-radius: 17px;
-    background: var(--card-light);
-    border: 1px solid var(--border);
-}
-.stat::after {
-    content: "";
-    position: absolute;
-    right: -18px;
-    bottom: -25px;
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    background: rgba(37,99,235,.07);
-}
-.stat-number { font-variant-numeric: tabular-nums; }
+        .card:hover {
+            box-shadow: var(--shadow-hover);
+            border-color: rgba(37, 99, 235, .16);
+        }
 
-.domain-grid { gap: 13px; }
-.domain-card {
-    background: var(--card-light);
-    border: 1px solid var(--border);
-    border-radius: 17px;
-    transition: transform .2s ease, box-shadow .2s ease;
-}
-.domain-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 15px 38px rgba(15,23,42,.08);
-}
-.domain-header {
-    padding: 14px 15px;
-    border-bottom: 1px solid var(--border);
-}
-.domain-title { font-size: 14px; }
-.domain-list {
-    color: var(--text);
-    background: transparent;
-}
+        .card:first-of-type {
+            position: relative;
+            overflow: hidden;
+        }
 
-.results textarea {
-    color: var(--text);
-    background: rgba(255,255,255,.58);
-    border-color: var(--border);
-    border-radius: 15px;
-}
-.dark-theme .results textarea {
-    background: rgba(0,0,0,.24);
-}
+        .card:first-of-type::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #2563eb, #7c3aed, #06b6d4);
+        }
 
-.notice {
-    background: rgba(37,99,235,.06);
-    border: 1px solid rgba(37,99,235,.15);
-    color: var(--muted);
-    border-radius: 16px;
-}
+        .connection-buttons {
+            gap: 10px;
+        }
 
-/* Theme control */
-.theme-toggle {
-    position: fixed;
-    z-index: 50;
-    top: 18px;
-    right: 18px;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    padding: 5px;
-    min-height: auto;
-    border: 1px solid var(--border);
-    border-radius: 999px;
-    background: var(--card);
-    color: var(--text);
-    backdrop-filter: blur(16px);
-    box-shadow: 0 10px 35px rgba(15,23,42,.12);
-}
-.theme-toggle span {
-    width: 34px;
-    height: 34px;
-    display: grid;
-    place-items: center;
-    border-radius: 50%;
-    font-size: 15px;
-}
-.theme-toggle .active {
-    background: var(--blue);
-    color: #fff;
-}
-.theme-toggle:hover { transform: none; }
+        button {
+            min-height: 42px;
+            border-radius: 12px;
+            padding: 11px 17px;
+            box-shadow: 0 7px 18px rgba(15, 23, 42, .08);
+            letter-spacing: .05px;
+        }
 
-@media(max-width:800px) {
-    .theme-toggle { top: 10px; right: 10px; }
-    .app-header { padding-top: 48px; }
-}
-@media(max-width:500px) {
-    .container { padding: 18px 12px 45px; }
-    .card { padding: 18px; border-radius: 19px; }
-    .theme-toggle span { width: 30px; height: 30px; }
-}
+        button:hover {
+            box-shadow: 0 12px 26px rgba(37, 99, 235, .15);
+        }
 
-/* Reduced motion accessibility */
-@media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
-        animation-duration: .01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: .01ms !important;
-        scroll-behavior: auto !important;
-    }
-}
+        button:active {
+            transform: translateY(0) scale(.98);
+        }
 
-</style>
+        .gmail-btn {
+            background: linear-gradient(135deg, #4285f4, #2563eb);
+        }
+
+        .disconnect-btn {
+            background: linear-gradient(135deg, #ef4444, #b91c1c);
+        }
+
+        .extract-btn {
+            background: linear-gradient(135deg, #2563eb, #4f46e5);
+        }
+
+        .export-btn {
+            background: linear-gradient(135deg, #16a34a, #15803d);
+        }
+
+        .copy-btn {
+            background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+        }
+
+        .settings {
+            gap: 13px;
+            margin-top: 20px;
+        }
+
+        .setting-card {
+            background: var(--card-light);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 17px;
+            transition: border-color .2s ease, transform .2s ease;
+        }
+
+        .setting-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(37, 99, 235, .24);
+        }
+
+        .setting-card label {
+            font-weight: 700;
+            color: var(--muted);
+            letter-spacing: .2px;
+        }
+
+        input,
+        select {
+            min-height: 44px;
+            color: var(--text) !important;
+            background: rgba(255, 255, 255, .72) !important;
+            border-color: var(--border) !important;
+            border-radius: 11px !important;
+            transition: box-shadow .2s ease, border-color .2s ease;
+        }
+
+        .dark-theme input,
+        .dark-theme select {
+            background: rgba(0, 0, 0, .25) !important;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: rgba(37, 99, 235, .65) !important;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, .11) !important;
+        }
+
+        .status-box {
+            background: var(--card-light);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+        }
+
+        .status-title {
+            color: var(--text);
+        }
+
+        .stats {
+            gap: 12px;
+        }
+
+        .stat {
+            position: relative;
+            overflow: hidden;
+            padding: 19px;
+            border-radius: 17px;
+            background: var(--card-light);
+            border: 1px solid var(--border);
+        }
+
+        .stat::after {
+            content: "";
+            position: absolute;
+            right: -18px;
+            bottom: -25px;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(37, 99, 235, .07);
+        }
+
+        .stat-number {
+            font-variant-numeric: tabular-nums;
+        }
+
+        .domain-grid {
+            gap: 13px;
+        }
+
+        .domain-card {
+            background: var(--card-light);
+            border: 1px solid var(--border);
+            border-radius: 17px;
+            transition: transform .2s ease, box-shadow .2s ease;
+        }
+
+        .domain-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 38px rgba(15, 23, 42, .08);
+        }
+
+        .domain-header {
+            padding: 14px 15px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .domain-title {
+            font-size: 14px;
+        }
+
+        .domain-list {
+            color: var(--text);
+            background: transparent;
+        }
+
+        .results textarea {
+            color: var(--text);
+            background: rgba(255, 255, 255, .58);
+            border-color: var(--border);
+            border-radius: 15px;
+        }
+
+        .dark-theme .results textarea {
+            background: rgba(0, 0, 0, .24);
+        }
+
+        .notice {
+            background: rgba(37, 99, 235, .06);
+            border: 1px solid rgba(37, 99, 235, .15);
+            color: var(--muted);
+            border-radius: 16px;
+        }
+
+        /* Theme control */
+        .theme-toggle {
+            position: fixed;
+            z-index: 50;
+            top: 18px;
+            right: 18px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px;
+            min-height: auto;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            background: var(--card);
+            color: var(--text);
+            backdrop-filter: blur(16px);
+            box-shadow: 0 10px 35px rgba(15, 23, 42, .12);
+        }
+
+        .theme-toggle span {
+            width: 34px;
+            height: 34px;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            font-size: 15px;
+        }
+
+        .theme-toggle .active {
+            background: var(--blue);
+            color: #fff;
+        }
+
+        .theme-toggle:hover {
+            transform: none;
+        }
+
+        @media(max-width:800px) {
+            .theme-toggle {
+                top: 10px;
+                right: 10px;
+            }
+
+            .app-header {
+                padding-top: 48px;
+            }
+        }
+
+        @media(max-width:500px) {
+            .container {
+                padding: 18px 12px 45px;
+            }
+
+            .card {
+                padding: 18px;
+                border-radius: 19px;
+            }
+
+            .theme-toggle span {
+                width: 30px;
+                height: 30px;
+            }
+        }
+
+        /* Reduced motion accessibility */
+        @media (prefers-reduced-motion: reduce) {
+
+            *,
+            *::before,
+            *::after {
+                animation-duration: .01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: .01ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -1185,24 +1289,6 @@ readonly
 placeholder="Extracted email addresses will appear here..."></textarea>
 
         </div>
-
-
-        <div class="notice">
-
-            <strong>How it works:</strong>
-            Select a date range, connect Gmail and scan the matching messages.
-            The application reads each complete RAW Gmail message and extracts
-            unique email addresses from the message content.
-
-            <br><br>
-
-            <strong>Supported ISP categories:</strong>
-            Google, Yahoo, AOL, Microsoft, AT&amp;T and Other Domains.
-
-        </div>
-
-    </div>
-
 
     <script>
         // ============================================================
@@ -2556,11 +2642,517 @@ new Event("change")
 
     </script>
 
+
+    <!-- ============================================================
+     BOTTOM VISUAL — ORIGINAL INBOX VS SPAM BATTLE
+     Isolated in an iframe so the existing extractor CSS/JS is
+     completely untouched. Responsive on desktop/tablet/mobile.
+     ============================================================ -->
+    <div style="width:100%;max-width:1240px;margin:8px auto 0;padding:0 0 20px;">
+        <iframe title="Inbox vs Spam Battle" srcdoc="&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+
+&lt;head&gt;
+    &lt;meta charset=&quot;UTF-8&quot;&gt;
+    &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;
+    &lt;title&gt;MailScope - Inbox vs Spam Battle&lt;/title&gt;
+    &lt;style&gt;
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: transparent;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif;
+            overflow: hidden;
+        }
+
+        /* CONTAINER / ARENA */
+        .battle-arena {
+            position: relative;
+            width: 100%;
+            max-width: 680px;
+            height: 320px;
+            background: transparent;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 40px;
+            user-select: none;
+        }
+
+        /* LASER BEAM / FORCE FIELD CONNECTOR */
+        .laser-beam {
+            position: absolute;
+            top: 50%;
+            left: 140px;
+            right: 140px;
+            height: 4px;
+            background: linear-gradient(90deg, #10b981 0%, #6366f1 50%, #f43f5e 100%);
+            transform: translateY(-50%);
+            z-index: 1;
+            opacity: 0.6;
+            border-radius: 2px;
+            box-shadow: 0 0 12px rgba(99, 102, 241, 0.5);
+        }
+
+        /* CHARACTER BASE */
+        .agent-card {
+            position: relative;
+            width: 130px;
+            height: 150px;
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 12px;
+            z-index: 3;
+            transition: all 0.3s ease;
+        }
+
+        /* INBOX AGENT */
+        .inbox-agent {
+            border: 1.5px solid rgba(16, 185, 129, 0.4);
+            box-shadow: 0 10px 30px -10px rgba(16, 185, 129, 0.3);
+            animation: inboxHover 3.6s ease-in-out infinite;
+        }
+
+        /* SPAM AGENT */
+        .spam-agent {
+            border: 1.5px solid rgba(244, 63, 94, 0.4);
+            box-shadow: 0 10px 30px -10px rgba(244, 63, 94, 0.3);
+            animation: spamHover 3.6s ease-in-out infinite;
+        }
+
+        /* BADGE / AVATAR CIRCLE */
+        .agent-avatar {
+            position: relative;
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .inbox-agent .agent-avatar {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.4));
+            border: 1px solid rgba(16, 185, 129, 0.5);
+        }
+
+        .spam-agent .agent-avatar {
+            background: linear-gradient(135deg, rgba(244, 63, 94, 0.2), rgba(225, 29, 72, 0.4));
+            border: 1px solid rgba(244, 63, 94, 0.5);
+        }
+
+        /* INBOX GRAPHIC (SHIELD / CHECK) */
+        .icon-shield {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #10b981;
+            border-radius: 0 0 12px 12px;
+            position: relative;
+        }
+
+        .icon-shield::after {
+            content: &#x27;&#x27;;
+            position: absolute;
+            top: 5px;
+            left: 7px;
+            width: 5px;
+            height: 9px;
+            border: solid #10b981;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+
+        /* SPAM GRAPHIC (WARNING/GLITCH BOX) */
+        .icon-warning {
+            width: 24px;
+            height: 24px;
+            position: relative;
+        }
+
+        .icon-warning::before {
+            content: &#x27;!&#x27;;
+            position: absolute;
+            font-weight: 900;
+            font-size: 18px;
+            color: #f43f5e;
+            top: -2px;
+            left: 8px;
+        }
+
+        .icon-warning::after {
+            content: &#x27;&#x27;;
+            position: absolute;
+            inset: 0;
+            border: 2px solid #f43f5e;
+            border-radius: 6px;
+            transform: rotate(45deg);
+        }
+
+        /* TYPOGRAPHY */
+        .agent-meta {
+            text-align: center;
+        }
+
+        .agent-title {
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .inbox-agent .agent-title {
+            color: #10b981;
+        }
+
+        .spam-agent .agent-title {
+            color: #f43f5e;
+        }
+
+        .agent-status {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-top: 2px;
+            font-weight: 500;
+        }
+
+        /* TUG LINES / BEAMS FROM AGENTS */
+        .tether {
+            position: absolute;
+            top: 50%;
+            height: 2px;
+            z-index: 2;
+        }
+
+        .inbox-tether {
+            right: -60px;
+            width: 60px;
+            background: linear-gradient(90deg, #10b981, rgba(16, 185, 129, 0));
+            animation: tetherPulse 1.8s infinite alternate;
+        }
+
+        .spam-tether {
+            left: -60px;
+            width: 60px;
+            background: linear-gradient(-90deg, #f43f5e, rgba(244, 63, 94, 0));
+            animation: tetherPulse 1.8s infinite alternate-reverse;
+        }
+
+        /* ENVELOPE (CENTRAL PRIZE) */
+        .envelope-wrapper {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 4;
+            animation: battleTug 3.6s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+        }
+
+        .envelope {
+            position: relative;
+            width: 72px;
+            height: 48px;
+            background: #1e293b;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 12px 25px -5px rgba(0, 0, 0, 0.5),
+                0 0 15px rgba(99, 102, 241, 0.4);
+            overflow: hidden;
+        }
+
+        /* ENVELOPE FLAP &amp; LINES */
+        .envelope-flap {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 0;
+            border-left: 36px solid transparent;
+            border-right: 36px solid transparent;
+            border-top: 26px solid #334155;
+            z-index: 2;
+        }
+
+        .envelope-body {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(0, 0, 0, 0.15) 100%);
+        }
+
+        .status-dot {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #6366f1;
+            box-shadow: 0 0 8px #6366f1;
+            animation: dotGlow 1.2s infinite alternate;
+        }
+
+        /* KEYFRAME ANIMATIONS */
+
+        /* Battle Tug Movement */
+        @keyframes battleTug {
+
+            0%,
+            100% {
+                transform: translate(-50%, -50%) rotate(0deg);
+            }
+
+            18% {
+                /* Inbox pulls left */
+                transform: translate(-150%, -50%) rotate(-6deg);
+            }
+
+            32% {
+                /* Spam yanks right */
+                transform: translate(50%, -50%) rotate(7deg);
+            }
+
+            50% {
+                /* Inbox heavy strain */
+                transform: translate(-180%, -52%) rotate(-10deg);
+            }
+
+            68% {
+                /* Spam counter-pull */
+                transform: translate(30%, -48%) rotate(5deg);
+            }
+
+            82% {
+                /* Tension equilibrium */
+                transform: translate(-50%, -53%) rotate(-1deg) scale(1.05);
+            }
+        }
+
+        /* Agent Floating &amp; Sway */
+        @keyframes inboxHover {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            18% {
+                transform: translateY(-4px) translateX(-6px);
+            }
+
+            50% {
+                transform: translateY(3px) translateX(-10px);
+            }
+
+            82% {
+                transform: translateY(-2px) translateX(-2px);
+            }
+        }
+
+        @keyframes spamHover {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            32% {
+                transform: translateY(-5px) translateX(8px);
+            }
+
+            68% {
+                transform: translateY(4px) translateX(6px);
+            }
+
+            82% {
+                transform: translateY(-2px) translateX(2px);
+            }
+        }
+
+        @keyframes tetherPulse {
+            0% {
+                opacity: 0.3;
+                stroke-dashoffset: 0;
+            }
+
+            100% {
+                opacity: 0.8;
+                stroke-dashoffset: 10;
+            }
+        }
+
+        @keyframes dotGlow {
+            from {
+                opacity: 0.4;
+                transform: scale(0.9);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1.3);
+            }
+        }
+
+        /* MOBILE RESPONSIVENESS */
+        @media (max-width: 580px) {
+            .battle-arena {
+                padding: 0 10px;
+                height: 240px;
+            }
+
+            .agent-card {
+                width: 95px;
+                height: 115px;
+                padding: 10px 8px;
+                border-radius: 14px;
+            }
+
+            .agent-avatar {
+                width: 38px;
+                height: 38px;
+                border-radius: 10px;
+            }
+
+            .icon-shield {
+                width: 18px;
+                height: 18px;
+            }
+
+            .icon-shield::after {
+                top: 3px;
+                left: 5px;
+                width: 4px;
+                height: 7px;
+            }
+
+            .icon-warning {
+                width: 18px;
+                height: 18px;
+            }
+
+            .icon-warning::before {
+                font-size: 14px;
+                left: 6px;
+                top: -3px;
+            }
+
+            .agent-title {
+                font-size: 10px;
+            }
+
+            .agent-status {
+                font-size: 8px;
+            }
+
+            .envelope {
+                width: 54px;
+                height: 36px;
+            }
+
+            .envelope-flap {
+                border-left-width: 27px;
+                border-right-width: 27px;
+                border-top-width: 19px;
+            }
+
+            .laser-beam {
+                left: 95px;
+                right: 95px;
+            }
+
+            @keyframes battleTug {
+
+                0%,
+                100% {
+                    transform: translate(-50%, -50%) rotate(0deg);
+                }
+
+                18% {
+                    transform: translate(-120%, -50%) rotate(-6deg);
+                }
+
+                32% {
+                    transform: translate(20%, -50%) rotate(7deg);
+                }
+
+                50% {
+                    transform: translate(-135%, -52%) rotate(-10deg);
+                }
+
+                68% {
+                    transform: translate(15%, -48%) rotate(5deg);
+                }
+
+                82% {
+                    transform: translate(-50%, -53%) rotate(-1deg) scale(1.05);
+                }
+            }
+        }
+    &lt;/style&gt;
+&lt;/head&gt;
+
+&lt;body&gt;
+
+    &lt;div class=&quot;battle-arena&quot;&gt;
+        &lt;!-- CONNECTING ENERGY LINE --&gt;
+        &lt;div class=&quot;laser-beam&quot;&gt;&lt;/div&gt;
+
+        &lt;!-- INBOX NODE --&gt;
+        &lt;div class=&quot;agent-card inbox-agent&quot;&gt;
+            &lt;div class=&quot;agent-avatar&quot;&gt;
+                &lt;div class=&quot;icon-shield&quot;&gt;&lt;/div&gt;
+            &lt;/div&gt;
+            &lt;div class=&quot;agent-meta&quot;&gt;
+                &lt;div class=&quot;agent-title&quot;&gt;Inbox&lt;/div&gt;
+                &lt;div class=&quot;agent-status&quot;&gt;Filtering&lt;/div&gt;
+            &lt;/div&gt;
+            &lt;div class=&quot;tether inbox-tether&quot;&gt;&lt;/div&gt;
+        &lt;/div&gt;
+
+        &lt;!-- PRIZE ENVELOPE --&gt;
+        &lt;div class=&quot;envelope-wrapper&quot;&gt;
+            &lt;div class=&quot;envelope&quot;&gt;
+                &lt;div class=&quot;envelope-flap&quot;&gt;&lt;/div&gt;
+                &lt;div class=&quot;envelope-body&quot;&gt;&lt;/div&gt;
+                &lt;div class=&quot;status-dot&quot;&gt;&lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+
+        &lt;!-- SPAM NODE --&gt;
+        &lt;div class=&quot;agent-card spam-agent&quot;&gt;
+            &lt;div class=&quot;agent-avatar&quot;&gt;
+                &lt;div class=&quot;icon-warning&quot;&gt;&lt;/div&gt;
+            &lt;/div&gt;
+            &lt;div class=&quot;agent-meta&quot;&gt;
+                &lt;div class=&quot;agent-title&quot;&gt;Spam&lt;/div&gt;
+                &lt;div class=&quot;agent-status&quot;&gt;Blocked&lt;/div&gt;
+            &lt;/div&gt;
+            &lt;div class=&quot;tether spam-tether&quot;&gt;&lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+
+&lt;/body&gt;
+
+&lt;/html&gt;" style="display:block;width:100%;height:340px;border:0;background:transparent;overflow:hidden;"
+            loading="lazy" scrolling="no">
+        </iframe>
+    </div>
 </body>
 
 </html>
 
-
-this is my current email extractor code which is looks very old style make it with current updation level ui designs and button types lists add ux designs which is enhance this webpage quality with current trend and dont change any core concepts only alterate its looks  
-
-Change the name Mailscope to Extract Emails with any animated live logo with this name and add light and dark theme on top
