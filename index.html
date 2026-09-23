@@ -1318,7 +1318,44 @@ let emailAddresses = new Set();
 // ============================================================
 
 const EMAIL_REGEX =
-/[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)+/g;
+/[A-Za-z0-9.!#$%&'*+/=?^_`{|}~-]+@[A-Za-z0-9.-]+/g;
+
+function isValidEmailAddress(email) {
+
+if (!email || typeof email !== "string") return false;
+if (/\s/.test(email)) return false;
+email = email.trim();
+if (email.length > 320) return false;
+
+const atIndex = email.indexOf("@");
+if (atIndex <= 0 || atIndex !== email.lastIndexOf("@")) return false;
+
+const localPart = email.slice(0, atIndex);
+const domainPart = email.slice(atIndex + 1);
+if (!localPart || !domainPart) return false;
+
+if (localPart.length > 64) return false;
+if (!/^[A-Za-z0-9._+-]+$/.test(localPart)) return false;
+if (localPart.startsWith(".") || localPart.endsWith(".") || localPart.includes("..")) return false;
+
+if (!/^[A-Za-z0-9.-]+$/.test(domainPart)) return false;
+if (domainPart.startsWith(".") || domainPart.endsWith(".") || domainPart.includes("..")) return false;
+if (domainPart.length > 255) return false;
+
+const domainLabels = domainPart.split(".");
+if (domainLabels.length < 2) return false;
+
+for (const label of domainLabels) {
+    if (label.length < 1 || label.length > 63) return false;
+    if (label.startsWith("-") || label.endsWith("-")) return false;
+    if (!/^[A-Za-z0-9-]+$/.test(label)) return false;
+}
+
+const tld = domainLabels[domainLabels.length - 1];
+if (tld.length < 2) return false;
+
+return true;
+}
 
 
 // ============================================================
@@ -1856,49 +1893,35 @@ return binary;
 
 function extractEmailsFromText(text) {
 
-if (!text) {
+if (!text || typeof text !== "string") {
 return;
 }
 
-const matches =
-text.match(
-EMAIL_REGEX
-);
+const matches = text.match(EMAIL_REGEX);
 
 if (!matches) {
 return;
 }
 
-for (
-const email of matches
-) {
+for (const email of matches) {
 
-let cleanEmail =
-email
+let cleanEmail = email
 .trim()
 .toLowerCase();
 
-cleanEmail =
-cleanEmail.replace(
-/[.,;:!?'"<>()\[\]{}]+$/g,
+cleanEmail = cleanEmail.replace(
+/[.,;:!?"'<>()[\]{}]+$/g,
 ""
 );
 
-if (
-cleanEmail &&
-cleanEmail.includes("@")
-) {
-
-emailAddresses.add(
-cleanEmail
-);
-
+if (!isValidEmailAddress(cleanEmail)) {
+continue;
 }
 
-}
+emailAddresses.add(cleanEmail);
 
 }
-
+}
 
 // ============================================================
 // RAW MESSAGE
@@ -3155,4 +3178,3 @@ new Event("change")
 </body>
 
 </html>
-
