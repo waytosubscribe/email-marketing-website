@@ -4,253 +4,1161 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Email Address Extractor</title>
+
 <script src="https://accounts.google.com/gsi/client" async defer></script>
+
 <style>
-* { box-sizing: border-box; }
-body { margin: 0; font-family: Arial, sans-serif; background: #f4f7fb; color: #1f2937; }
-.container { max-width: 900px; margin: 60px auto; padding: 20px; }
-.card { background: white; border-radius: 16px; padding: 35px; box-shadow: 0 8px 30px rgba(0,0,0,0.08); }
-h1 { text-align: center; margin-top: 0; margin-bottom: 10px; }
-.description { text-align: center; color: #6b7280; margin-bottom: 30px; }
-.connection-buttons { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; }
-button { border: none; border-radius: 8px; padding: 13px 24px; font-size: 15px; font-weight: 600; cursor: pointer; transition: 0.2s; }
-button:hover { transform: translateY(-1px); opacity: 0.92; }
-button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-.gmail-btn { background: #4285f4; color: white; }
-.disconnect-btn { background: #dc2626; color: white; }
-.extract-btn { background: #111827; color: white; }
-.export-btn { background: #16a34a; color: white; }
-.status-box { margin-top: 30px; padding: 18px; background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 10px; }
-.status-title { font-weight: bold; margin-bottom: 8px; }
-#status { color: #6b7280; }
-.progress-wrap { margin-top: 12px; background: #e5e7eb; border-radius: 6px; height: 8px; overflow: hidden; display: none; }
-.progress-bar { height: 100%; background: #4285f4; width: 0%; transition: width 0.2s; }
-.stats { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
-.stat { background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 10px; padding: 20px; text-align: center; }
-.stat-number { font-size: 28px; font-weight: bold; margin-bottom: 5px; }
-.stat-label { color: #6b7280; font-size: 14px; }
-.results { margin-top: 30px; }
-.results-header { display: flex; justify-content: space-between; align-items: center; gap: 15px; margin-bottom: 10px; flex-wrap: wrap; }
-.settings-row { display: flex; align-items: center; gap: 10px; margin-top: 15px; justify-content: center; flex-wrap: wrap; font-size: 14px; color: #374151; }
-.settings-row input[type="number"] { width: 90px; padding: 6px 8px; border: 1px solid #d1d5db; border-radius: 6px; }
-textarea { width: 100%; min-height: 280px; padding: 15px; border: 1px solid #d1d5db; border-radius: 10px; resize: vertical; font-family: monospace; font-size: 14px; background: #fafafa; }
-.notice { margin-top: 25px; padding: 15px; border-radius: 10px; background: #fff7ed; border: 1px solid #fed7aa; color: #9a3412; font-size: 14px; line-height: 1.5; }
-@media (max-width: 600px) { .container { margin: 20px auto; } .card { padding: 22px; } .stats { grid-template-columns: 1fr; } }
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f4f7fb;
+  color: #1f2937;
+}
+
+.container {
+  max-width: 900px;
+  margin: 60px auto;
+  padding: 20px;
+}
+
+.card {
+  background: white;
+  border-radius: 16px;
+  padding: 35px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+}
+
+h1 {
+  text-align: center;
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.description {
+  text-align: center;
+  color: #6b7280;
+  margin-bottom: 30px;
+}
+
+.connection-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+button {
+  border: none;
+  border-radius: 8px;
+  padding: 13px 24px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+button:hover {
+  transform: translateY(-1px);
+  opacity: 0.92;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.gmail-btn {
+  background: #4285f4;
+  color: white;
+}
+
+.disconnect-btn {
+  background: #dc2626;
+  color: white;
+}
+
+.extract-btn {
+  background: #111827;
+  color: white;
+}
+
+.export-btn {
+  background: #16a34a;
+  color: white;
+}
+
+.status-box {
+  margin-top: 30px;
+  padding: 18px;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+}
+
+.status-title {
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+#status {
+  color: #6b7280;
+}
+
+.progress-wrap {
+  margin-top: 12px;
+  background: #e5e7eb;
+  border-radius: 6px;
+  height: 8px;
+  overflow: hidden;
+  display: none;
+}
+
+.progress-bar {
+  height: 100%;
+  background: #4285f4;
+  width: 0%;
+  transition: width 0.2s;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.stat {
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 20px;
+  text-align: center;
+}
+
+.stat-number {
+  font-size: 28px;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.stat-label {
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.results {
+  margin-top: 30px;
+}
+
+.results-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.settings-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 15px;
+  justify-content: center;
+  flex-wrap: wrap;
+  font-size: 14px;
+  color: #374151;
+}
+
+.settings-row input[type="number"] {
+  width: 90px;
+  padding: 6px 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+}
+
+textarea {
+  width: 100%;
+  min-height: 280px;
+  padding: 15px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  resize: vertical;
+  font-family: monospace;
+  font-size: 14px;
+  background: #fafafa;
+}
+
+.notice {
+  margin-top: 25px;
+  padding: 15px;
+  border-radius: 10px;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  color: #9a3412;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+@media (max-width: 600px) {
+  .container {
+    margin: 20px auto;
+  }
+
+  .card {
+    padding: 22px;
+  }
+
+  .stats {
+    grid-template-columns: 1fr;
+  }
+}
 </style>
 </head>
+
 <body>
+
 <div class="container">
+
   <div class="card">
+
     <h1>Email Address Extractor</h1>
-    <p class="description">Connect your Gmail account and extract unique email addresses from your inbox.</p>
+
+    <p class="description">
+      Connect your Gmail account and extract email addresses from the complete raw messages.
+    </p>
 
     <div class="connection-buttons">
-      <button class="gmail-btn" id="connectBtn" onclick="connectGmail()">Connect Gmail</button>
-      <button class="disconnect-btn" id="disconnectBtn" onclick="disconnectGmail()" style="display:none;">Disconnect</button>
+
+      <button
+        class="gmail-btn"
+        id="connectBtn"
+        onclick="connectGmail()">
+        Connect Gmail
+      </button>
+
+      <button
+        class="disconnect-btn"
+        id="disconnectBtn"
+        onclick="disconnectGmail()"
+        style="display:none;">
+        Disconnect
+      </button>
+
     </div>
 
     <div class="settings-row">
-      <label for="maxMessages">Max messages to scan:</label>
-      <input type="number" id="maxMessages" value="1000" min="50" max="10000" step="50">
+
+      <label for="maxMessages">
+        Max messages to scan:
+      </label>
+
+      <input
+        type="number"
+        id="maxMessages"
+        value="1000"
+        min="50"
+        max="10000"
+        step="50">
+
     </div>
 
     <div class="status-box">
-      <div class="status-title">Connection Status</div>
-      <div id="status">Not connected</div>
-      <div class="progress-wrap" id="progressWrap"><div class="progress-bar" id="progressBar"></div></div>
+
+      <div class="status-title">
+        Connection Status
+      </div>
+
+      <div id="status">
+        Not connected
+      </div>
+
+      <div
+        class="progress-wrap"
+        id="progressWrap">
+
+        <div
+          class="progress-bar"
+          id="progressBar">
+        </div>
+
+      </div>
+
     </div>
 
     <div class="stats">
+
       <div class="stat">
-        <div class="stat-number" id="messageCount">0</div>
-        <div class="stat-label">Messages Scanned</div>
+
+        <div
+          class="stat-number"
+          id="messageCount">
+          0
+        </div>
+
+        <div class="stat-label">
+          Messages Scanned
+        </div>
+
       </div>
+
       <div class="stat">
-        <div class="stat-number" id="uniqueCount">0</div>
-        <div class="stat-label">Unique Email Addresses</div>
+
+        <div
+          class="stat-number"
+          id="uniqueCount">
+          0
+        </div>
+
+        <div class="stat-label">
+          Unique Email Addresses
+        </div>
+
       </div>
+
     </div>
 
     <div class="results">
+
       <div class="results-header">
+
         <h2>Email Addresses</h2>
+
         <div>
-          <button class="extract-btn" id="extractBtn" onclick="extractAddresses()" disabled>Extract Addresses</button>
-          <button class="export-btn" onclick="exportCSV()">Export CSV</button>
+
+          <button
+            class="extract-btn"
+            id="extractBtn"
+            onclick="extractAddresses()"
+            disabled>
+            Extract Addresses
+          </button>
+
+          <button
+            class="export-btn"
+            onclick="exportCSV()">
+            Export CSV
+          </button>
+
         </div>
+
       </div>
-      <textarea id="emailResults" readonly placeholder="Unique email addresses will appear here..."></textarea>
+
+      <textarea
+        id="emailResults"
+        readonly
+        placeholder="Unique email addresses will appear here...">
+      </textarea>
+
     </div>
 
     <div class="notice">
-      <strong>Security:</strong> This page uses Google's official sign-in (OAuth). Your Gmail password is never seen or stored by this page — only a temporary, read-only access token that lasts for your browser session.
+
+      <strong>Security:</strong>
+      This page uses Google's official OAuth sign-in.
+      Your Gmail password is never seen or stored by this page.
+      The application requests read-only Gmail access.
+
       <br><br>
-      <strong>Note:</strong> Since this app hasn't been verified by Google yet, only accounts added as "test users" in the Google Cloud project can sign in.
+
+      <strong>Extraction:</strong>
+      Each message is downloaded in RAW format and the complete
+      decoded message is scanned for email addresses.
+
+      <br><br>
+
+      <strong>Note:</strong>
+      Since this app hasn't been verified by Google yet,
+      only accounts added as test users in the Google Cloud project
+      can sign in.
+
     </div>
+
   </div>
+
 </div>
 
+
 <script>
-// ===== CONFIG: replace with your own Client ID from Google Cloud Console =====
-const CLIENT_ID = "280957260545-b1jcjc0l25jih4rn7sh63ef7uo3c83oo.apps.googleusercontent.com";
-const SCOPE = "https://www.googleapis.com/auth/gmail.readonly";
+
+// ============================================================
+// CONFIGURATION
+// ============================================================
+
+const CLIENT_ID =
+  "280957260545-b1jcjc0l25jih4rn7sh63ef7uo3c83oo.apps.googleusercontent.com";
+
+const SCOPE =
+  "https://www.googleapis.com/auth/gmail.readonly";
+
+
+// ============================================================
+// GLOBAL VARIABLES
+// ============================================================
 
 let accessToken = null;
+
 let tokenClient = null;
+
 let emailAddresses = new Set();
 
-const EMAIL_REGEX = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
+
+// ============================================================
+// EMAIL REGEX
+// ============================================================
+//
+// Finds normal email addresses anywhere in the message.
+//
+// Examples:
+// john@example.com
+// test.user@example.co.uk
+// user+tag@gmail.com
+//
+// ============================================================
+
+const EMAIL_REGEX =
+  /[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)+/g;
+
+
+// ============================================================
+// STATUS
+// ============================================================
 
 function setStatus(text) {
+
   document.getElementById("status").textContent = text;
+
 }
+
+
+// ============================================================
+// GOOGLE OAUTH
+// ============================================================
 
 function initTokenClient() {
-  tokenClient = google.accounts.oauth2.initTokenClient({
-    client_id: CLIENT_ID,
-    scope: SCOPE,
-    callback: (tokenResponse) => {
-      if (tokenResponse.error) {
-        setStatus("Sign-in failed: " + tokenResponse.error);
-        return;
+
+  tokenClient =
+    google.accounts.oauth2.initTokenClient({
+
+      client_id: CLIENT_ID,
+
+      scope: SCOPE,
+
+      callback: (tokenResponse) => {
+
+        if (tokenResponse.error) {
+
+          setStatus(
+            "Sign-in failed: " +
+            tokenResponse.error
+          );
+
+          return;
+        }
+
+        accessToken =
+          tokenResponse.access_token;
+
+        setStatus(
+          "Connected to Gmail. Ready to extract."
+        );
+
+        document.getElementById(
+          "connectBtn"
+        ).style.display = "none";
+
+        document.getElementById(
+          "disconnectBtn"
+        ).style.display = "inline-block";
+
+        document.getElementById(
+          "extractBtn"
+        ).disabled = false;
+
       }
-      accessToken = tokenResponse.access_token;
-      setStatus("Connected to Gmail. Ready to extract.");
-      document.getElementById("connectBtn").style.display = "none";
-      document.getElementById("disconnectBtn").style.display = "inline-block";
-      document.getElementById("extractBtn").disabled = false;
-    }
-  });
+
+    });
+
 }
+
 
 function connectGmail() {
-  if (!window.google || !google.accounts || !google.accounts.oauth2) {
-    setStatus("Google sign-in script hasn't loaded yet. Please wait a moment and try again.");
+
+  if (
+    !window.google ||
+    !google.accounts ||
+    !google.accounts.oauth2
+  ) {
+
+    setStatus(
+      "Google sign-in script hasn't loaded yet. Please wait a moment and try again."
+    );
+
     return;
   }
-  if (!tokenClient) initTokenClient();
+
+  if (!tokenClient) {
+
+    initTokenClient();
+
+  }
+
   tokenClient.requestAccessToken();
+
 }
+
+
+// ============================================================
+// DISCONNECT
+// ============================================================
 
 function disconnectGmail() {
+
   if (accessToken) {
-    google.accounts.oauth2.revoke(accessToken, () => {});
+
+    google.accounts.oauth2.revoke(
+      accessToken,
+      () => {}
+    );
+
   }
+
   accessToken = null;
+
+  emailAddresses.clear();
+
+  document.getElementById(
+    "emailResults"
+  ).value = "";
+
+  document.getElementById(
+    "messageCount"
+  ).textContent = "0";
+
+  document.getElementById(
+    "uniqueCount"
+  ).textContent = "0";
+
   setStatus("Not connected");
-  document.getElementById("connectBtn").style.display = "inline-block";
-  document.getElementById("disconnectBtn").style.display = "none";
-  document.getElementById("extractBtn").disabled = true;
+
+  document.getElementById(
+    "connectBtn"
+  ).style.display = "inline-block";
+
+  document.getElementById(
+    "disconnectBtn"
+  ).style.display = "none";
+
+  document.getElementById(
+    "extractBtn"
+  ).disabled = true;
+
 }
+
+
+// ============================================================
+// GMAIL API REQUEST
+// ============================================================
 
 async function gmailFetch(url) {
-  const res = await fetch(url, {
-    headers: { Authorization: "Bearer " + accessToken }
-  });
+
+  const res = await fetch(
+
+    url,
+
+    {
+      headers: {
+        Authorization:
+          "Bearer " + accessToken
+      }
+    }
+
+  );
+
+
   if (res.status === 401) {
-    setStatus("Session expired. Please reconnect.");
+
+    setStatus(
+      "Session expired. Please reconnect."
+    );
+
     disconnectGmail();
+
     throw new Error("Unauthorized");
+
   }
+
+
   if (res.status === 429) {
-    await new Promise(r => setTimeout(r, 2000));
+
+    await new Promise(
+      r => setTimeout(r, 2000)
+    );
+
     return gmailFetch(url);
+
   }
-  if (!res.ok) throw new Error("Gmail API error: " + res.status);
+
+
+  if (!res.ok) {
+
+    throw new Error(
+      "Gmail API error: " + res.status
+    );
+
+  }
+
+
   return res.json();
+
 }
+
+
+// ============================================================
+// LIST MESSAGE IDS
+// ============================================================
 
 async function listMessageIds(maxTotal) {
+
   let ids = [];
+
   let pageToken = null;
+
+
   do {
-    const batchSize = Math.min(500, maxTotal - ids.length);
-    let url = `https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=${batchSize}`;
-    if (pageToken) url += `&pageToken=${pageToken}`;
-    const data = await gmailFetch(url);
-    if (data.messages) ids = ids.concat(data.messages.map(m => m.id));
-    pageToken = data.nextPageToken;
-  } while (pageToken && ids.length < maxTotal);
-  return ids.slice(0, maxTotal);
-}
 
-function extractFromHeaders(headers) {
-  const wanted = ["From", "To", "Cc", "Reply-To"];
-  for (const h of headers) {
-    if (wanted.includes(h.name)) {
-      const matches = h.value.match(EMAIL_REGEX);
-      if (matches) matches.forEach(m => emailAddresses.add(m.toLowerCase()));
+    const batchSize =
+      Math.min(
+        500,
+        maxTotal - ids.length
+      );
+
+
+    let url =
+      `https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=${batchSize}`;
+
+
+    if (pageToken) {
+
+      url +=
+        `&pageToken=${pageToken}`;
+
     }
-  }
-}
 
-async function fetchMessageBatch(ids) {
-  const CONCURRENCY = 8;
-  let i = 0;
-  async function worker() {
-    while (i < ids.length) {
-      const id = ids[i++];
-      try {
-        const data = await gmailFetch(
-          `https://gmail.googleapis.com/gmail/v1/users/me/messages/${id}?format=metadata&metadataHeaders=From&metadataHeaders=To&metadataHeaders=Cc&metadataHeaders=Reply-To`
+
+    const data =
+      await gmailFetch(url);
+
+
+    if (data.messages) {
+
+      ids =
+        ids.concat(
+          data.messages.map(
+            m => m.id
+          )
         );
-        if (data.payload && data.payload.headers) {
-          extractFromHeaders(data.payload.headers);
-        }
-      } catch (e) {}
-      updateProgress(i, ids.length);
+
     }
-  }
-  const workers = Array.from({ length: CONCURRENCY }, worker);
-  await Promise.all(workers);
+
+
+    pageToken =
+      data.nextPageToken;
+
+
+  } while (
+    pageToken &&
+    ids.length < maxTotal
+  );
+
+
+  return ids.slice(
+    0,
+    maxTotal
+  );
+
 }
 
-function updateProgress(done, total) {
-  document.getElementById("messageCount").textContent = done;
-  document.getElementById("uniqueCount").textContent = emailAddresses.size;
-  const pct = total ? Math.round((done / total) * 100) : 0;
-  document.getElementById("progressBar").style.width = pct + "%";
-  document.getElementById("emailResults").value = Array.from(emailAddresses).sort().join("\n");
-}
 
-async function extractAddresses() {
-  if (!accessToken) {
-    setStatus("Please connect Gmail first.");
-    return;
+// ============================================================
+// BASE64URL DECODER
+// ============================================================
+//
+// Gmail API returns RAW message as base64url.
+//
+// This converts it back into the original RFC822 message.
+//
+// ============================================================
+
+function decodeBase64Url(data) {
+
+  data =
+    data
+      .replace(/-/g, "+")
+      .replace(/_/g, "/");
+
+
+  while (data.length % 4) {
+
+    data += "=";
+
   }
-  emailAddresses.clear();
-  const maxTotal = parseInt(document.getElementById("maxMessages").value, 10) || 1000;
-  document.getElementById("extractBtn").disabled = true;
-  document.getElementById("progressWrap").style.display = "block";
-  setStatus("Fetching message list...");
+
+
+  const binary =
+    atob(data);
+
+
+  const bytes =
+    new Uint8Array(
+      binary.length
+    );
+
+
+  for (
+    let i = 0;
+    i < binary.length;
+    i++
+  ) {
+
+    bytes[i] =
+      binary.charCodeAt(i);
+
+  }
+
+
+  // Decode UTF-8 where possible.
+  //
+  // If UTF-8 decoding fails, fall back
+  // to a simple character conversion.
 
   try {
-    const ids = await listMessageIds(maxTotal);
-    setStatus(`Scanning ${ids.length} messages...`);
-    await fetchMessageBatch(ids);
-    setStatus(`Done. Scanned ${ids.length} messages, found ${emailAddresses.size} unique addresses.`);
+
+    return new TextDecoder(
+      "utf-8",
+      {
+        fatal: false
+      }
+    ).decode(bytes);
+
   } catch (e) {
-    setStatus("Error during extraction: " + e.message);
-  } finally {
-    document.getElementById("extractBtn").disabled = false;
+
+    return binary;
+
   }
+
 }
 
-function exportCSV() {
-  if (emailAddresses.size === 0) {
-    alert("No email addresses available. Run Extract Addresses first.");
+
+// ============================================================
+// EXTRACT EMAILS FROM TEXT
+// ============================================================
+
+function extractEmailsFromText(text) {
+
+  if (!text) {
     return;
   }
-  const emails = Array.from(emailAddresses).sort();
-  const csv = "Email Address\n" + emails.join("\n");
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = "unique-email-addresses.csv";
-  link.click();
-  URL.revokeObjectURL(url);
+
+
+  const matches =
+    text.match(EMAIL_REGEX);
+
+
+  if (!matches) {
+    return;
+  }
+
+
+  for (const email of matches) {
+
+    let cleanEmail =
+      email
+        .trim()
+        .toLowerCase();
+
+
+    // Remove common trailing punctuation
+    // that can be attached to an address.
+
+    cleanEmail =
+      cleanEmail.replace(
+        /[.,;:!?'"<>()\[\]{}]+$/g,
+        ""
+      );
+
+
+    if (
+      cleanEmail &&
+      cleanEmail.includes("@")
+    ) {
+
+      emailAddresses.add(
+        cleanEmail
+      );
+
+    }
+
+  }
+
 }
+
+
+// ============================================================
+// FETCH COMPLETE RAW MESSAGE
+// ============================================================
+
+async function fetchRawMessage(id) {
+
+  const url =
+    `https://gmail.googleapis.com/gmail/v1/users/me/messages/${id}?format=raw`;
+
+
+  const data =
+    await gmailFetch(url);
+
+
+  if (!data.raw) {
+
+    return "";
+
+  }
+
+
+  return decodeBase64Url(
+    data.raw
+  );
+
+}
+
+
+// ============================================================
+// PROCESS ONE MESSAGE
+// ============================================================
+
+async function processMessage(id) {
+
+  try {
+
+    // Fetch the COMPLETE raw RFC822 message.
+
+    const rawMessage =
+      await fetchRawMessage(id);
+
+
+    if (!rawMessage) {
+      return;
+    }
+
+
+    // Search the ENTIRE raw message.
+
+    extractEmailsFromText(
+      rawMessage
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "Failed to process message:",
+      id,
+      error
+    );
+
+  }
+
+}
+
+
+// ============================================================
+// FETCH MESSAGES WITH CONCURRENCY
+// ============================================================
+
+async function fetchMessageBatch(ids) {
+
+  const CONCURRENCY = 8;
+
+  let index = 0;
+
+
+  async function worker() {
+
+    while (
+      index < ids.length
+    ) {
+
+      const currentIndex =
+        index++;
+
+      const id =
+        ids[currentIndex];
+
+
+      await processMessage(id);
+
+
+      updateProgress(
+        currentIndex + 1,
+        ids.length
+      );
+
+    }
+
+  }
+
+
+  const workers =
+    Array.from(
+      {
+        length:
+          Math.min(
+            CONCURRENCY,
+            ids.length
+          )
+      },
+      worker
+    );
+
+
+  await Promise.all(
+    workers
+  );
+
+}
+
+
+// ============================================================
+// PROGRESS
+// ============================================================
+
+function updateProgress(
+  done,
+  total
+) {
+
+  document.getElementById(
+    "messageCount"
+  ).textContent = done;
+
+
+  document.getElementById(
+    "uniqueCount"
+  ).textContent =
+    emailAddresses.size;
+
+
+  const pct =
+    total
+      ? Math.round(
+          (done / total) * 100
+        )
+      : 0;
+
+
+  document.getElementById(
+    "progressBar"
+  ).style.width =
+    pct + "%";
+
+
+  document.getElementById(
+    "emailResults"
+  ).value =
+    Array
+      .from(emailAddresses)
+      .sort()
+      .join("\n");
+
+}
+
+
+// ============================================================
+// MAIN EXTRACTION
+// ============================================================
+
+async function extractAddresses() {
+
+  if (!accessToken) {
+
+    setStatus(
+      "Please connect Gmail first."
+    );
+
+    return;
+
+  }
+
+
+  // Clear previous results.
+
+  emailAddresses.clear();
+
+
+  const maxTotal =
+    parseInt(
+      document.getElementById(
+        "maxMessages"
+      ).value,
+      10
+    ) || 1000;
+
+
+  document.getElementById(
+    "extractBtn"
+  ).disabled = true;
+
+
+  document.getElementById(
+    "progressWrap"
+  ).style.display = "block";
+
+
+  document.getElementById(
+    "progressBar"
+  ).style.width = "0%";
+
+
+  document.getElementById(
+    "emailResults"
+  ).value = "";
+
+
+  setStatus(
+    "Fetching message list..."
+  );
+
+
+  try {
+
+    // Get message IDs.
+
+    const ids =
+      await listMessageIds(
+        maxTotal
+      );
+
+
+    setStatus(
+      `Reading complete raw messages from ${ids.length} emails...`
+    );
+
+
+    // Fetch and scan every raw message.
+
+    await fetchMessageBatch(
+      ids
+    );
+
+
+    setStatus(
+      `Done. Scanned ${ids.length} messages and found ${emailAddresses.size} unique email addresses.`
+    );
+
+
+  } catch (e) {
+
+    console.error(e);
+
+    setStatus(
+      "Error during extraction: " +
+      e.message
+    );
+
+
+  } finally {
+
+    document.getElementById(
+      "extractBtn"
+    ).disabled = false;
+
+  }
+
+}
+
+
+// ============================================================
+// CSV EXPORT
+// ============================================================
+
+function exportCSV() {
+
+  if (
+    emailAddresses.size === 0
+  ) {
+
+    alert(
+      "No email addresses available. Run Extract Addresses first."
+    );
+
+    return;
+
+  }
+
+
+  const emails =
+    Array
+      .from(emailAddresses)
+      .sort();
+
+
+  const csv =
+    "Email Address\n" +
+    emails.join("\n");
+
+
+  const blob =
+    new Blob(
+      [csv],
+      {
+        type:
+          "text/csv;charset=utf-8;"
+      }
+    );
+
+
+  const url =
+    URL.createObjectURL(
+      blob
+    );
+
+
+  const link =
+    document.createElement(
+      "a"
+    );
+
+
+  link.href = url;
+
+  link.download =
+    "unique-email-addresses.csv";
+
+
+  document.body.appendChild(
+    link
+  );
+
+  link.click();
+
+  document.body.removeChild(
+    link
+  );
+
+
+  URL.revokeObjectURL(
+    url
+  );
+
+}
+
 </script>
+
 </body>
 </html>
+
