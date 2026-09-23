@@ -8,9 +8,7 @@
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 
 <style>
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 body {
   margin: 0;
@@ -20,8 +18,8 @@ body {
 }
 
 .container {
-  max-width: 900px;
-  margin: 60px auto;
+  max-width: 1000px;
+  margin: 40px auto;
   padding: 20px;
 }
 
@@ -92,6 +90,13 @@ button:disabled {
   color: white;
 }
 
+.export-small {
+  background: #2563eb;
+  color: white;
+  padding: 8px 14px;
+  font-size: 13px;
+}
+
 .status-box {
   margin-top: 30px;
   padding: 18px;
@@ -149,6 +154,49 @@ button:disabled {
 .stat-label {
   color: #6b7280;
   font-size: 14px;
+}
+
+.domain-section {
+  margin-top: 30px;
+}
+
+.domain-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  margin-bottom: 15px;
+  overflow: hidden;
+}
+
+.domain-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 15px 18px;
+  background: #f8fafc;
+  flex-wrap: wrap;
+}
+
+.domain-title {
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.domain-count {
+  color: #6b7280;
+  font-size: 14px;
+  margin-left: 8px;
+}
+
+.domain-list {
+  padding: 15px 18px;
+  max-height: 220px;
+  overflow-y: auto;
+  font-family: monospace;
+  font-size: 14px;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  word-break: break-all;
 }
 
 .results {
@@ -225,161 +273,370 @@ textarea {
 
 <div class="container">
 
-  <div class="card">
+<div class="card">
 
-    <h1>Email Address Extractor</h1>
+<h1>Email Address Extractor</h1>
 
-    <p class="description">
-      Connect your Gmail account and extract email addresses from the complete raw messages.
-    </p>
+<p class="description">
+Connect your Gmail account and extract email addresses from complete raw email messages.
+</p>
 
-    <div class="connection-buttons">
+<div class="connection-buttons">
 
-      <button
-        class="gmail-btn"
-        id="connectBtn"
-        onclick="connectGmail()">
-        Connect Gmail
-      </button>
+<button
+class="gmail-btn"
+id="connectBtn"
+onclick="connectGmail()">
+Connect Gmail
+</button>
 
-      <button
-        class="disconnect-btn"
-        id="disconnectBtn"
-        onclick="disconnectGmail()"
-        style="display:none;">
-        Disconnect
-      </button>
+<button
+class="disconnect-btn"
+id="disconnectBtn"
+onclick="disconnectGmail()"
+style="display:none;">
+Disconnect
+</button>
 
-    </div>
+</div>
 
-    <div class="settings-row">
+<div class="settings-row">
 
-      <label for="maxMessages">
-        Max messages to scan:
-      </label>
+<label for="maxMessages">
+Max messages to scan:
+</label>
 
-      <input
-        type="number"
-        id="maxMessages"
-        value="1000"
-        min="50"
-        max="10000"
-        step="50">
+<input
+type="number"
+id="maxMessages"
+value="1000"
+min="50"
+max="10000"
+step="50">
 
-    </div>
+</div>
 
-    <div class="status-box">
+<div class="status-box">
 
-      <div class="status-title">
-        Connection Status
-      </div>
+<div class="status-title">
+Connection Status
+</div>
 
-      <div id="status">
-        Not connected
-      </div>
+<div id="status">
+Not connected
+</div>
 
-      <div
-        class="progress-wrap"
-        id="progressWrap">
+<div
+class="progress-wrap"
+id="progressWrap">
 
-        <div
-          class="progress-bar"
-          id="progressBar">
-        </div>
+<div
+class="progress-bar"
+id="progressBar">
+</div>
 
-      </div>
+</div>
 
-    </div>
+</div>
 
-    <div class="stats">
+<div class="stats">
 
-      <div class="stat">
+<div class="stat">
 
-        <div
-          class="stat-number"
-          id="messageCount">
-          0
-        </div>
+<div
+class="stat-number"
+id="messageCount">
+0
+</div>
 
-        <div class="stat-label">
-          Messages Scanned
-        </div>
+<div class="stat-label">
+Messages Scanned
+</div>
 
-      </div>
+</div>
 
-      <div class="stat">
+<div class="stat">
 
-        <div
-          class="stat-number"
-          id="uniqueCount">
-          0
-        </div>
+<div
+class="stat-number"
+id="uniqueCount">
+0
+</div>
 
-        <div class="stat-label">
-          Unique Email Addresses
-        </div>
+<div class="stat-label">
+Total Unique Email Addresses
+</div>
 
-      </div>
+</div>
 
-    </div>
+</div>
 
-    <div class="results">
 
-      <div class="results-header">
+<!-- DOMAIN RESULTS -->
 
-        <h2>Email Addresses</h2>
+<div class="domain-section">
 
-        <div>
+<h2>Email Domain Categories</h2>
 
-          <button
-            class="extract-btn"
-            id="extractBtn"
-            onclick="extractAddresses()"
-            disabled>
-            Extract Addresses
-          </button>
 
-          <button
-            class="export-btn"
-            onclick="exportCSV()">
-            Export CSV
-          </button>
+<div class="domain-card">
 
-        </div>
+<div class="domain-header">
 
-      </div>
+<div>
+<span class="domain-title">
+Google Email Domains
+</span>
 
-      <textarea
-        id="emailResults"
-        readonly
-        placeholder="Unique email addresses will appear here...">
-      </textarea>
+<span
+class="domain-count"
+id="googleCount">
+0
+</span>
+</div>
 
-    </div>
+<button
+class="export-small"
+onclick="exportCategory('Google Email Domains')">
+Export
+</button>
 
-    <div class="notice">
+</div>
 
-      <strong>Security:</strong>
-      This page uses Google's official OAuth sign-in.
-      Your Gmail password is never seen or stored by this page.
-      The application requests read-only Gmail access.
+<div
+class="domain-list"
+id="googleList">
+No addresses found.
+</div>
 
-      <br><br>
+</div>
 
-      <strong>Extraction:</strong>
-      Each message is downloaded in RAW format and the complete
-      decoded message is scanned for email addresses.
 
-      <br><br>
+<div class="domain-card">
 
-      <strong>Note:</strong>
-      Since this app hasn't been verified by Google yet,
-      only accounts added as test users in the Google Cloud project
-      can sign in.
+<div class="domain-header">
 
-    </div>
+<div>
+<span class="domain-title">
+Yahoo Email Domains
+</span>
 
-  </div>
+<span
+class="domain-count"
+id="yahooCount">
+0
+</span>
+</div>
+
+<button
+class="export-small"
+onclick="exportCategory('Yahoo Email Domains')">
+Export
+</button>
+
+</div>
+
+<div
+class="domain-list"
+id="yahooList">
+No addresses found.
+</div>
+
+</div>
+
+
+<div class="domain-card">
+
+<div class="domain-header">
+
+<div>
+<span class="domain-title">
+AOL Email Domains
+</span>
+
+<span
+class="domain-count"
+id="aolCount">
+0
+</span>
+</div>
+
+<button
+class="export-small"
+onclick="exportCategory('AOL Email Domains')">
+Export
+</button>
+
+</div>
+
+<div
+class="domain-list"
+id="aolList">
+No addresses found.
+</div>
+
+</div>
+
+
+<div class="domain-card">
+
+<div class="domain-header">
+
+<div>
+<span class="domain-title">
+Microsoft Email Domains
+</span>
+
+<span
+class="domain-count"
+id="microsoftCount">
+0
+</span>
+</div>
+
+<button
+class="export-small"
+onclick="exportCategory('Microsoft Email Domains')">
+Export
+</button>
+
+</div>
+
+<div
+class="domain-list"
+id="microsoftList">
+No addresses found.
+</div>
+
+</div>
+
+
+<div class="domain-card">
+
+<div class="domain-header">
+
+<div>
+<span class="domain-title">
+AT&amp;T Email Domains
+</span>
+
+<span
+class="domain-count"
+id="attCount">
+0
+</span>
+</div>
+
+<button
+class="export-small"
+onclick="exportCategory('AT&T Email Domains')">
+Export
+</button>
+
+</div>
+
+<div
+class="domain-list"
+id="attList">
+No addresses found.
+</div>
+
+</div>
+
+
+<div class="domain-card">
+
+<div class="domain-header">
+
+<div>
+<span class="domain-title">
+Other Domains
+</span>
+
+<span
+class="domain-count"
+id="otherCount">
+0
+</span>
+</div>
+
+<button
+class="export-small"
+onclick="exportCategory('Other Domains')">
+Export
+</button>
+
+</div>
+
+<div
+class="domain-list"
+id="otherList">
+No addresses found.
+</div>
+
+</div>
+
+</div>
+
+
+<!-- ALL RESULTS -->
+
+<div class="results">
+
+<div class="results-header">
+
+<h2>All Email Addresses</h2>
+
+<div>
+
+<button
+class="extract-btn"
+id="extractBtn"
+onclick="extractAddresses()"
+disabled>
+Extract Addresses
+</button>
+
+<button
+class="export-btn"
+onclick="exportCSV()">
+Export All
+</button>
+
+</div>
+
+</div>
+
+<textarea
+id="emailResults"
+readonly
+placeholder="Unique email addresses will appear here..."></textarea>
+
+</div>
+
+
+<div class="notice">
+
+<strong>Security:</strong>
+This page uses Google's official OAuth sign-in.
+Your Gmail password is never seen or stored by this page.
+The application requests read-only Gmail access.
+
+<br><br>
+
+<strong>Extraction:</strong>
+Each Gmail message is downloaded in RAW format.
+The complete decoded message is scanned for email addresses.
+
+<br><br>
+
+<strong>Domain Categories:</strong>
+Google, Yahoo, AOL, Microsoft, AT&amp;T and Other domains are
+automatically separated after extraction.
+
+</div>
+
+</div>
 
 </div>
 
@@ -391,10 +648,10 @@ textarea {
 // ============================================================
 
 const CLIENT_ID =
-  "280957260545-b1jcjc0l25jih4rn7sh63ef7uo3c83oo.apps.googleusercontent.com";
+"280957260545-b1jcjc0l25jih4rn7sh63ef7uo3c83oo.apps.googleusercontent.com";
 
 const SCOPE =
-  "https://www.googleapis.com/auth/gmail.readonly";
+"https://www.googleapis.com/auth/gmail.readonly";
 
 
 // ============================================================
@@ -411,18 +668,71 @@ let emailAddresses = new Set();
 // ============================================================
 // EMAIL REGEX
 // ============================================================
-//
-// Finds normal email addresses anywhere in the message.
-//
-// Examples:
-// john@example.com
-// test.user@example.co.uk
-// user+tag@gmail.com
-//
-// ============================================================
 
 const EMAIL_REGEX =
-  /[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)+/g;
+/[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)+/g;
+
+
+// ============================================================
+// EMAIL DOMAIN GROUPS
+// ============================================================
+
+const EMAIL_DOMAIN_GROUPS = {
+
+"Google Email Domains": [
+"gmail.com",
+"googlemail.com"
+],
+
+"Yahoo Email Domains": [
+"yahoo.com",
+"ymail.com",
+"myyahoo.com"
+],
+
+"AOL Email Domains": [
+"aol.com",
+"aim.com",
+"cs.com",
+"netscape.net"
+],
+
+"Microsoft Email Domains": [
+"outlook.com",
+"hotmail.com",
+"msn.com",
+"live.com"
+],
+
+"AT&T Email Domains": [
+"att.net",
+"currently.com",
+"sbcglobal.net",
+"bellsouth.net"
+]
+
+};
+
+
+// ============================================================
+// CATEGORY STORAGE
+// ============================================================
+
+let categorizedEmails = {
+
+"Google Email Domains": new Set(),
+
+"Yahoo Email Domains": new Set(),
+
+"AOL Email Domains": new Set(),
+
+"Microsoft Email Domains": new Set(),
+
+"AT&T Email Domains": new Set(),
+
+"Other Domains": new Set()
+
+};
 
 
 // ============================================================
@@ -431,7 +741,7 @@ const EMAIL_REGEX =
 
 function setStatus(text) {
 
-  document.getElementById("status").textContent = text;
+document.getElementById("status").textContent = text;
 
 }
 
@@ -442,73 +752,75 @@ function setStatus(text) {
 
 function initTokenClient() {
 
-  tokenClient =
-    google.accounts.oauth2.initTokenClient({
+tokenClient =
+google.accounts.oauth2.initTokenClient({
 
-      client_id: CLIENT_ID,
+client_id: CLIENT_ID,
 
-      scope: SCOPE,
+scope: SCOPE,
 
-      callback: (tokenResponse) => {
+callback: (tokenResponse) => {
 
-        if (tokenResponse.error) {
+if (tokenResponse.error) {
 
-          setStatus(
-            "Sign-in failed: " +
-            tokenResponse.error
-          );
+setStatus(
+"Sign-in failed: " +
+tokenResponse.error
+);
 
-          return;
-        }
+return;
 
-        accessToken =
-          tokenResponse.access_token;
+}
 
-        setStatus(
-          "Connected to Gmail. Ready to extract."
-        );
+accessToken =
+tokenResponse.access_token;
 
-        document.getElementById(
-          "connectBtn"
-        ).style.display = "none";
+setStatus(
+"Connected to Gmail. Ready to extract."
+);
 
-        document.getElementById(
-          "disconnectBtn"
-        ).style.display = "inline-block";
+document.getElementById(
+"connectBtn"
+).style.display = "none";
 
-        document.getElementById(
-          "extractBtn"
-        ).disabled = false;
+document.getElementById(
+"disconnectBtn"
+).style.display = "inline-block";
 
-      }
+document.getElementById(
+"extractBtn"
+).disabled = false;
 
-    });
+}
+
+});
 
 }
 
 
 function connectGmail() {
 
-  if (
-    !window.google ||
-    !google.accounts ||
-    !google.accounts.oauth2
-  ) {
+if (
+!window.google ||
+!google.accounts ||
+!google.accounts.oauth2
+) {
 
-    setStatus(
-      "Google sign-in script hasn't loaded yet. Please wait a moment and try again."
-    );
+setStatus(
+"Google sign-in script hasn't loaded yet. Please wait a moment and try again."
+);
 
-    return;
-  }
+return;
 
-  if (!tokenClient) {
+}
 
-    initTokenClient();
+if (!tokenClient) {
 
-  }
+initTokenClient();
 
-  tokenClient.requestAccessToken();
+}
+
+tokenClient.requestAccessToken();
 
 }
 
@@ -519,102 +831,104 @@ function connectGmail() {
 
 function disconnectGmail() {
 
-  if (accessToken) {
+if (accessToken) {
 
-    google.accounts.oauth2.revoke(
-      accessToken,
-      () => {}
-    );
+google.accounts.oauth2.revoke(
+accessToken,
+() => {}
+);
 
-  }
+}
 
-  accessToken = null;
+accessToken = null;
 
-  emailAddresses.clear();
+emailAddresses.clear();
 
-  document.getElementById(
-    "emailResults"
-  ).value = "";
+resetCategories();
 
-  document.getElementById(
-    "messageCount"
-  ).textContent = "0";
+document.getElementById(
+"emailResults"
+).value = "";
 
-  document.getElementById(
-    "uniqueCount"
-  ).textContent = "0";
+document.getElementById(
+"messageCount"
+).textContent = "0";
 
-  setStatus("Not connected");
+document.getElementById(
+"uniqueCount"
+).textContent = "0";
 
-  document.getElementById(
-    "connectBtn"
-  ).style.display = "inline-block";
+setStatus("Not connected");
 
-  document.getElementById(
-    "disconnectBtn"
-  ).style.display = "none";
+document.getElementById(
+"connectBtn"
+).style.display = "inline-block";
 
-  document.getElementById(
-    "extractBtn"
-  ).disabled = true;
+document.getElementById(
+"disconnectBtn"
+).style.display = "none";
+
+document.getElementById(
+"extractBtn"
+).disabled = true;
 
 }
 
 
 // ============================================================
-// GMAIL API REQUEST
+// GMAIL API
 // ============================================================
 
 async function gmailFetch(url) {
 
-  const res = await fetch(
+const res = await fetch(
 
-    url,
+url,
 
-    {
-      headers: {
-        Authorization:
-          "Bearer " + accessToken
-      }
-    }
+{
+headers: {
+Authorization:
+"Bearer " + accessToken
+}
+}
 
-  );
-
-
-  if (res.status === 401) {
-
-    setStatus(
-      "Session expired. Please reconnect."
-    );
-
-    disconnectGmail();
-
-    throw new Error("Unauthorized");
-
-  }
+);
 
 
-  if (res.status === 429) {
+if (res.status === 401) {
 
-    await new Promise(
-      r => setTimeout(r, 2000)
-    );
+setStatus(
+"Session expired. Please reconnect."
+);
 
-    return gmailFetch(url);
+disconnectGmail();
 
-  }
+throw new Error("Unauthorized");
 
-
-  if (!res.ok) {
-
-    throw new Error(
-      "Gmail API error: " + res.status
-    );
-
-  }
+}
 
 
-  return res.json();
+if (res.status === 429) {
+
+await new Promise(
+r => setTimeout(r, 2000)
+);
+
+return gmailFetch(url);
+
+}
+
+
+if (!res.ok) {
+
+throw new Error(
+"Gmail API error: " +
+res.status
+);
+
+}
+
+return res.json();
 
 }
 
@@ -625,62 +939,55 @@ async function gmailFetch(url) {
 
 async function listMessageIds(maxTotal) {
 
-  let ids = [];
+let ids = [];
 
-  let pageToken = null;
+let pageToken = null;
 
+do {
 
-  do {
+const batchSize =
+Math.min(
+500,
+maxTotal - ids.length
+);
 
-    const batchSize =
-      Math.min(
-        500,
-        maxTotal - ids.length
-      );
+let url =
+`https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=${batchSize}`;
 
+if (pageToken) {
 
-    let url =
-      `https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=${batchSize}`;
+url +=
+`&pageToken=${pageToken}`;
 
+}
 
-    if (pageToken) {
+const data =
+await gmailFetch(url);
 
-      url +=
-        `&pageToken=${pageToken}`;
+if (data.messages) {
 
-    }
+ids =
+ids.concat(
+data.messages.map(
+m => m.id
+)
+);
 
+}
 
-    const data =
-      await gmailFetch(url);
+pageToken =
+data.nextPageToken;
 
+}
+while (
+pageToken &&
+ids.length < maxTotal
+);
 
-    if (data.messages) {
-
-      ids =
-        ids.concat(
-          data.messages.map(
-            m => m.id
-          )
-        );
-
-    }
-
-
-    pageToken =
-      data.nextPageToken;
-
-
-  } while (
-    pageToken &&
-    ids.length < maxTotal
-  );
-
-
-  return ids.slice(
-    0,
-    maxTotal
-  );
+return ids.slice(
+0,
+maxTotal
+);
 
 }
 
@@ -688,69 +995,107 @@ async function listMessageIds(maxTotal) {
 // ============================================================
 // BASE64URL DECODER
 // ============================================================
-//
-// Gmail API returns RAW message as base64url.
-//
-// This converts it back into the original RFC822 message.
-//
-// ============================================================
 
 function decodeBase64Url(data) {
 
-  data =
-    data
-      .replace(/-/g, "+")
-      .replace(/_/g, "/");
+data =
+data
+.replace(/-/g, "+")
+.replace(/_/g, "/");
+
+while (data.length % 4) {
+
+data += "=";
+
+}
+
+const binary =
+atob(data);
+
+const bytes =
+new Uint8Array(
+binary.length
+);
+
+for (
+let i = 0;
+i < binary.length;
+i++
+) {
+
+bytes[i] =
+binary.charCodeAt(i);
+
+}
+
+try {
+
+return new TextDecoder(
+"utf-8",
+{
+fatal: false
+}
+).decode(bytes);
+
+}
+catch (e) {
+
+return binary;
+
+}
+
+}
 
 
-  while (data.length % 4) {
+// ============================================================
+// GET DOMAIN
+// ============================================================
 
-    data += "=";
+function getDomain(email) {
 
-  }
+const parts =
+email
+.toLowerCase()
+.split("@");
 
+if (parts.length !== 2) {
 
-  const binary =
-    atob(data);
+return "";
 
+}
 
-  const bytes =
-    new Uint8Array(
-      binary.length
-    );
+return parts[1];
 
-
-  for (
-    let i = 0;
-    i < binary.length;
-    i++
-  ) {
-
-    bytes[i] =
-      binary.charCodeAt(i);
-
-  }
+}
 
 
-  // Decode UTF-8 where possible.
-  //
-  // If UTF-8 decoding fails, fall back
-  // to a simple character conversion.
+// ============================================================
+// CLASSIFY EMAIL
+// ============================================================
 
-  try {
+function classifyEmail(email) {
 
-    return new TextDecoder(
-      "utf-8",
-      {
-        fatal: false
-      }
-    ).decode(bytes);
+const domain =
+getDomain(email);
 
-  } catch (e) {
+for (
+const [group, domains]
+of Object.entries(
+EMAIL_DOMAIN_GROUPS
+)
+) {
 
-    return binary;
+if (
+domains.includes(domain)
+) {
 
-  }
+return group;
+
+}
+
+}
+
+return "Other Domains";
 
 }
 
@@ -761,174 +1106,288 @@ function decodeBase64Url(data) {
 
 function extractEmailsFromText(text) {
 
-  if (!text) {
-    return;
-  }
+if (!text) {
 
+return;
 
-  const matches =
-    text.match(EMAIL_REGEX);
+}
 
+const matches =
+text.match(
+EMAIL_REGEX
+);
 
-  if (!matches) {
-    return;
-  }
+if (!matches) {
 
+return;
 
-  for (const email of matches) {
+}
 
-    let cleanEmail =
-      email
-        .trim()
-        .toLowerCase();
+for (
+const email
+of matches
+) {
 
+let cleanEmail =
+email
+.trim()
+.toLowerCase();
 
-    // Remove common trailing punctuation
-    // that can be attached to an address.
+cleanEmail =
+cleanEmail.replace(
+/[.,;:!?'"<>()\[\]{}]+$/g,
+""
+);
 
-    cleanEmail =
-      cleanEmail.replace(
-        /[.,;:!?'"<>()\[\]{}]+$/g,
-        ""
-      );
+if (
+cleanEmail &&
+cleanEmail.includes("@")
+) {
 
+emailAddresses.add(
+cleanEmail
+);
 
-    if (
-      cleanEmail &&
-      cleanEmail.includes("@")
-    ) {
+}
 
-      emailAddresses.add(
-        cleanEmail
-      );
-
-    }
-
-  }
+}
 
 }
 
 
 // ============================================================
-// FETCH COMPLETE RAW MESSAGE
+// FETCH RAW MESSAGE
 // ============================================================
 
 async function fetchRawMessage(id) {
 
-  const url =
-    `https://gmail.googleapis.com/gmail/v1/users/me/messages/${id}?format=raw`;
+const url =
+`https://gmail.googleapis.com/gmail/v1/users/me/messages/${id}?format=raw`;
 
+const data =
+await gmailFetch(url);
 
-  const data =
-    await gmailFetch(url);
+if (!data.raw) {
 
+return "";
 
-  if (!data.raw) {
+}
 
-    return "";
-
-  }
-
-
-  return decodeBase64Url(
-    data.raw
-  );
+return decodeBase64Url(
+data.raw
+);
 
 }
 
 
 // ============================================================
-// PROCESS ONE MESSAGE
+// PROCESS MESSAGE
 // ============================================================
 
 async function processMessage(id) {
 
-  try {
+try {
 
-    // Fetch the COMPLETE raw RFC822 message.
+const rawMessage =
+await fetchRawMessage(id);
 
-    const rawMessage =
-      await fetchRawMessage(id);
+if (!rawMessage) {
 
+return;
 
-    if (!rawMessage) {
-      return;
-    }
+}
 
+extractEmailsFromText(
+rawMessage
+);
 
-    // Search the ENTIRE raw message.
+}
+catch (error) {
 
-    extractEmailsFromText(
-      rawMessage
-    );
+console.error(
+"Failed to process message:",
+id,
+error
+);
 
-
-  } catch (error) {
-
-    console.error(
-      "Failed to process message:",
-      id,
-      error
-    );
-
-  }
+}
 
 }
 
 
 // ============================================================
-// FETCH MESSAGES WITH CONCURRENCY
+// FETCH MESSAGE BATCH
 // ============================================================
 
 async function fetchMessageBatch(ids) {
 
-  const CONCURRENCY = 8;
+const CONCURRENCY = 8;
 
-  let index = 0;
+let index = 0;
+
+async function worker() {
+
+while (
+index < ids.length
+) {
+
+const currentIndex =
+index++;
+
+const id =
+ids[currentIndex];
+
+await processMessage(id);
+
+updateProgress(
+currentIndex + 1,
+ids.length
+);
+
+}
+
+}
+
+const workers =
+Array.from(
+{
+length:
+Math.min(
+CONCURRENCY,
+ids.length
+)
+},
+worker
+);
+
+await Promise.all(
+workers
+);
+
+}
 
 
-  async function worker() {
+// ============================================================
+// CATEGORIZE ALL EMAILS
+// ============================================================
 
-    while (
-      index < ids.length
-    ) {
+function categorizeEmails() {
 
-      const currentIndex =
-        index++;
+resetCategories();
 
-      const id =
-        ids[currentIndex];
+for (
+const email
+of emailAddresses
+) {
 
+const category =
+classifyEmail(email);
 
-      await processMessage(id);
+categorizedEmails[
+category
+].add(email);
 
+}
 
-      updateProgress(
-        currentIndex + 1,
-        ids.length
-      );
+updateCategoryDisplay();
 
-    }
-
-  }
-
-
-  const workers =
-    Array.from(
-      {
-        length:
-          Math.min(
-            CONCURRENCY,
-            ids.length
-          )
-      },
-      worker
-    );
+}
 
 
-  await Promise.all(
-    workers
-  );
+// ============================================================
+// RESET CATEGORIES
+// ============================================================
+
+function resetCategories() {
+
+for (
+const category
+of Object.keys(
+categorizedEmails
+)
+) {
+
+categorizedEmails[
+category
+].clear();
+
+}
+
+updateCategoryDisplay();
+
+}
+
+
+// ============================================================
+// UPDATE CATEGORY DISPLAY
+// ============================================================
+
+function updateCategoryDisplay() {
+
+const displayMap = {
+
+"Google Email Domains": {
+list: "googleList",
+count: "googleCount"
+},
+
+"Yahoo Email Domains": {
+list: "yahooList",
+count: "yahooCount"
+},
+
+"AOL Email Domains": {
+list: "aolList",
+count: "aolCount"
+},
+
+"Microsoft Email Domains": {
+list: "microsoftList",
+count: "microsoftCount"
+},
+
+"AT&T Email Domains": {
+list: "attList",
+count: "attCount"
+},
+
+"Other Domains": {
+list: "otherList",
+count: "otherCount"
+}
+
+};
+
+
+for (
+const [category, elements]
+of Object.entries(
+displayMap
+)
+) {
+
+const emails =
+Array
+.from(
+categorizedEmails[
+category
+]
+)
+.sort();
+
+document.getElementById(
+elements.count
+).textContent =
+emails.length;
+
+document.getElementById(
+elements.list
+).textContent =
+emails.length
+? emails.join("\n")
+: "No addresses found.";
+
+}
 
 }
 
@@ -938,42 +1397,41 @@ async function fetchMessageBatch(ids) {
 // ============================================================
 
 function updateProgress(
-  done,
-  total
+done,
+total
 ) {
 
-  document.getElementById(
-    "messageCount"
-  ).textContent = done;
+document.getElementById(
+"messageCount"
+).textContent =
+done;
 
+document.getElementById(
+"uniqueCount"
+).textContent =
+emailAddresses.size;
 
-  document.getElementById(
-    "uniqueCount"
-  ).textContent =
-    emailAddresses.size;
+const pct =
+total
+? Math.round(
+(done / total) * 100
+)
+: 0;
 
+document.getElementById(
+"progressBar"
+).style.width =
+pct + "%";
 
-  const pct =
-    total
-      ? Math.round(
-          (done / total) * 100
-        )
-      : 0;
-
-
-  document.getElementById(
-    "progressBar"
-  ).style.width =
-    pct + "%";
-
-
-  document.getElementById(
-    "emailResults"
-  ).value =
-    Array
-      .from(emailAddresses)
-      .sort()
-      .join("\n");
+document.getElementById(
+"emailResults"
+).value =
+Array
+.from(
+emailAddresses
+)
+.sort()
+.join("\n");
 
 }
 
@@ -984,176 +1442,218 @@ function updateProgress(
 
 async function extractAddresses() {
 
-  if (!accessToken) {
+if (!accessToken) {
 
-    setStatus(
-      "Please connect Gmail first."
-    );
+setStatus(
+"Please connect Gmail first."
+);
 
-    return;
+return;
 
-  }
+}
 
+emailAddresses.clear();
 
-  // Clear previous results.
+resetCategories();
 
-  emailAddresses.clear();
+const maxTotal =
+parseInt(
+document.getElementById(
+"maxMessages"
+).value,
+10
+) || 1000;
 
+document.getElementById(
+"extractBtn"
+).disabled = true;
 
-  const maxTotal =
-    parseInt(
-      document.getElementById(
-        "maxMessages"
-      ).value,
-      10
-    ) || 1000;
+document.getElementById(
+"progressWrap"
+).style.display = "block";
 
+document.getElementById(
+"progressBar"
+).style.width = "0%";
 
-  document.getElementById(
-    "extractBtn"
-  ).disabled = true;
+document.getElementById(
+"emailResults"
+).value = "";
 
+setStatus(
+"Fetching message list..."
+);
 
-  document.getElementById(
-    "progressWrap"
-  ).style.display = "block";
+try {
 
+const ids =
+await listMessageIds(
+maxTotal
+);
 
-  document.getElementById(
-    "progressBar"
-  ).style.width = "0%";
+setStatus(
+`Reading complete raw messages from ${ids.length} emails...`
+);
 
+await fetchMessageBatch(
+ids
+);
 
-  document.getElementById(
-    "emailResults"
-  ).value = "";
+categorizeEmails();
 
+setStatus(
+`Done. Scanned ${ids.length} messages and found ${emailAddresses.size} unique email addresses.`
+);
 
-  setStatus(
-    "Fetching message list..."
-  );
+}
+catch (e) {
 
+console.error(e);
 
-  try {
+setStatus(
+"Error during extraction: " +
+e.message
+);
 
-    // Get message IDs.
+}
+finally {
 
-    const ids =
-      await listMessageIds(
-        maxTotal
-      );
+document.getElementById(
+"extractBtn"
+).disabled = false;
 
-
-    setStatus(
-      `Reading complete raw messages from ${ids.length} emails...`
-    );
-
-
-    // Fetch and scan every raw message.
-
-    await fetchMessageBatch(
-      ids
-    );
-
-
-    setStatus(
-      `Done. Scanned ${ids.length} messages and found ${emailAddresses.size} unique email addresses.`
-    );
-
-
-  } catch (e) {
-
-    console.error(e);
-
-    setStatus(
-      "Error during extraction: " +
-      e.message
-    );
-
-
-  } finally {
-
-    document.getElementById(
-      "extractBtn"
-    ).disabled = false;
-
-  }
+}
 
 }
 
 
 // ============================================================
-// CSV EXPORT
+// EXPORT ALL EMAILS
 // ============================================================
 
 function exportCSV() {
 
-  if (
-    emailAddresses.size === 0
-  ) {
+if (
+emailAddresses.size === 0
+) {
 
-    alert(
-      "No email addresses available. Run Extract Addresses first."
-    );
+alert(
+"No email addresses available. Run Extract Addresses first."
+);
 
-    return;
+return;
 
-  }
+}
 
+const emails =
+Array
+.from(emailAddresses)
+.sort();
 
-  const emails =
-    Array
-      .from(emailAddresses)
-      .sort();
+const csv =
+"Email Address\n" +
+emails.join("\n");
 
+downloadCSV(
+csv,
+"all-email-addresses.csv"
+);
 
-  const csv =
-    "Email Address\n" +
-    emails.join("\n");
-
-
-  const blob =
-    new Blob(
-      [csv],
-      {
-        type:
-          "text/csv;charset=utf-8;"
-      }
-    );
+}
 
 
-  const url =
-    URL.createObjectURL(
-      blob
-    );
+// ============================================================
+// EXPORT CATEGORY
+// ============================================================
+
+function exportCategory(category) {
+
+const emails =
+Array
+.from(
+categorizedEmails[
+category
+] || []
+)
+.sort();
+
+if (emails.length === 0) {
+
+alert(
+"No email addresses found in " +
+category +
+"."
+);
+
+return;
+
+}
+
+const csv =
+"Email Address\n" +
+emails.join("\n");
+
+const filename =
+category
+.toLowerCase()
+.replace(/[^a-z0-9]+/g, "-")
+.replace(/^-|-$/g, "") +
+".csv";
+
+downloadCSV(
+csv,
+filename
+);
+
+}
 
 
-  const link =
-    document.createElement(
-      "a"
-    );
+// ============================================================
+// DOWNLOAD CSV
+// ============================================================
 
+function downloadCSV(
+csv,
+filename
+) {
 
-  link.href = url;
+const blob =
+new Blob(
+[csv],
+{
+type:
+"text/csv;charset=utf-8;"
+}
+);
 
-  link.download =
-    "unique-email-addresses.csv";
+const url =
+URL.createObjectURL(
+blob
+);
 
+const link =
+document.createElement(
+"a"
+);
 
-  document.body.appendChild(
-    link
-  );
+link.href = url;
 
-  link.click();
+link.download =
+filename;
 
-  document.body.removeChild(
-    link
-  );
+document.body.appendChild(
+link
+);
 
+link.click();
 
-  URL.revokeObjectURL(
-    url
-  );
+document.body.removeChild(
+link
+);
+
+URL.revokeObjectURL(
+url
+);
 
 }
 
@@ -1161,4 +1661,3 @@ function exportCSV() {
 
 </body>
 </html>
-
