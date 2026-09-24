@@ -3134,513 +3134,95 @@ document.getElementById("domainFilter").addEventListener(
 
 
     <!-- ============================================================
-     BOTTOM VISUAL — ORIGINAL INBOX VS SPAM BATTLE
-     Isolated in an iframe so the existing extractor CSS/JS is
-     completely untouched. Responsive on desktop/tablet/mobile.
+     BOTTOM VISUAL — EMAIL RAW-MESSAGE EXPLOSION
+     Replaces the previous Inbox vs Spam animation.
      ============================================================ -->
-    <div style="width:100%;max-width:1240px;margin:8px auto 0;padding:0 0 20px;">
-        <iframe title="Inbox vs Spam Battle" srcdoc="&lt;!DOCTYPE html&gt;
-&lt;html lang=&quot;en&quot;&gt;
-
-&lt;head&gt;
-    &lt;meta charset=&quot;UTF-8&quot;&gt;
-    &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;
-    &lt;title&gt;MailScope - Inbox vs Spam Battle&lt;/title&gt;
-    &lt;style&gt;
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            background: transparent;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif;
-            overflow: hidden;
-        }
-
-        /* CONTAINER / ARENA */
-        .battle-arena {
+    <style>
+        .raw-email-explosion {
             position: relative;
             width: 100%;
-            max-width: 680px;
-            height: 320px;
-            background: transparent;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 40px;
-            user-select: none;
-        }
-
-        /* LASER BEAM / FORCE FIELD CONNECTOR */
-        .laser-beam {
-            position: absolute;
-            top: 50%;
-            left: 140px;
-            right: 140px;
-            height: 4px;
-            background: linear-gradient(90deg, #10b981 0%, #6366f1 50%, #f43f5e 100%);
-            transform: translateY(-50%);
-            z-index: 1;
-            opacity: 0.6;
-            border-radius: 2px;
-            box-shadow: 0 0 12px rgba(99, 102, 241, 0.5);
-        }
-
-        /* CHARACTER BASE */
-        .agent-card {
-            position: relative;
-            width: 130px;
-            height: 150px;
-            background: rgba(15, 23, 42, 0.65);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-radius: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: space-between;
-            padding: 16px 12px;
-            z-index: 3;
-            transition: all 0.3s ease;
-        }
-
-        /* INBOX AGENT */
-        .inbox-agent {
-            border: 1.5px solid rgba(16, 185, 129, 0.4);
-            box-shadow: 0 10px 30px -10px rgba(16, 185, 129, 0.3);
-            animation: inboxHover 3.6s ease-in-out infinite;
-        }
-
-        /* SPAM AGENT */
-        .spam-agent {
-            border: 1.5px solid rgba(244, 63, 94, 0.4);
-            box-shadow: 0 10px 30px -10px rgba(244, 63, 94, 0.3);
-            animation: spamHover 3.6s ease-in-out infinite;
-        }
-
-        /* BADGE / AVATAR CIRCLE */
-        .agent-avatar {
-            position: relative;
-            width: 56px;
-            height: 56px;
-            border-radius: 16px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .inbox-agent .agent-avatar {
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.4));
-            border: 1px solid rgba(16, 185, 129, 0.5);
-        }
-
-        .spam-agent .agent-avatar {
-            background: linear-gradient(135deg, rgba(244, 63, 94, 0.2), rgba(225, 29, 72, 0.4));
-            border: 1px solid rgba(244, 63, 94, 0.5);
-        }
-
-        /* INBOX GRAPHIC (SHIELD / CHECK) */
-        .icon-shield {
-            width: 24px;
-            height: 24px;
-            border: 2px solid #10b981;
-            border-radius: 0 0 12px 12px;
-            position: relative;
-        }
-
-        .icon-shield::after {
-            content: &#x27;&#x27;;
-            position: absolute;
-            top: 5px;
-            left: 7px;
-            width: 5px;
-            height: 9px;
-            border: solid #10b981;
-            border-width: 0 2px 2px 0;
-            transform: rotate(45deg);
-        }
-
-        /* SPAM GRAPHIC (WARNING/GLITCH BOX) */
-        .icon-warning {
-            width: 24px;
-            height: 24px;
-            position: relative;
-        }
-
-        .icon-warning::before {
-            content: &#x27;!&#x27;;
-            position: absolute;
-            font-weight: 900;
-            font-size: 18px;
-            color: #f43f5e;
-            top: -2px;
-            left: 8px;
-        }
-
-        .icon-warning::after {
-            content: &#x27;&#x27;;
-            position: absolute;
-            inset: 0;
-            border: 2px solid #f43f5e;
-            border-radius: 6px;
-            transform: rotate(45deg);
-        }
-
-        /* TYPOGRAPHY */
-        .agent-meta {
-            text-align: center;
-        }
-
-        .agent-title {
-            font-size: 13px;
-            font-weight: 700;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-
-        .inbox-agent .agent-title {
-            color: #10b981;
-        }
-
-        .spam-agent .agent-title {
-            color: #f43f5e;
-        }
-
-        .agent-status {
-            font-size: 10px;
-            color: rgba(255, 255, 255, 0.5);
-            margin-top: 2px;
-            font-weight: 500;
-        }
-
-        /* TUG LINES / BEAMS FROM AGENTS */
-        .tether {
-            position: absolute;
-            top: 50%;
-            height: 2px;
-            z-index: 2;
-        }
-
-        .inbox-tether {
-            right: -60px;
-            width: 60px;
-            background: linear-gradient(90deg, #10b981, rgba(16, 185, 129, 0));
-            animation: tetherPulse 1.8s infinite alternate;
-        }
-
-        .spam-tether {
-            left: -60px;
-            width: 60px;
-            background: linear-gradient(-90deg, #f43f5e, rgba(244, 63, 94, 0));
-            animation: tetherPulse 1.8s infinite alternate-reverse;
-        }
-
-        /* ENVELOPE (CENTRAL PRIZE) */
-        .envelope-wrapper {
-            position: absolute;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 4;
-            animation: battleTug 3.6s cubic-bezier(0.45, 0, 0.55, 1) infinite;
-        }
-
-        .envelope {
-            position: relative;
-            width: 72px;
-            height: 48px;
-            background: #1e293b;
-            border-radius: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 12px 25px -5px rgba(0, 0, 0, 0.5),
-                0 0 15px rgba(99, 102, 241, 0.4);
+            max-width: 1240px;
+            height: 430px;
+            margin: 8px auto 20px;
             overflow: hidden;
+            background:
+                radial-gradient(circle at 50% 50%, rgba(37,99,235,.075) 0%, rgba(124,58,237,.045) 28%, transparent 62%);
+            border-top: 1px solid rgba(37,99,235,.10);
+            border-bottom: 1px solid rgba(124,58,237,.08);
+            border-radius: 22px;
+            box-shadow: inset 0 0 80px rgba(37,99,235,.025);
+            isolation: isolate;
         }
-
-        /* ENVELOPE FLAP &amp; LINES */
-        .envelope-flap {
+        .raw-email-explosion::before {
+            content: "";
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 0;
-            height: 0;
-            border-left: 36px solid transparent;
-            border-right: 36px solid transparent;
-            border-top: 26px solid #334155;
-            z-index: 2;
+            inset: -50%;
+            background: radial-gradient(circle, rgba(37,99,235,.09) 0%, transparent 28%), radial-gradient(circle, rgba(124,58,237,.07) 0%, transparent 30%);
+            animation: rexBgPulse 4s ease-in-out infinite;
+            z-index: -2;
         }
+        @keyframes rexBgPulse { 0%,100%{transform:scale(.9);opacity:.55} 50%{transform:scale(1.15);opacity:1} }
+        .rex-stage { position:absolute; left:50%; top:50%; width:360px; height:300px; transform:translate(-50%,-50%); }
+        .rex-ring { position:absolute; left:50%; top:50%; width:90px; height:90px; border-radius:50%; border:2px solid rgba(37,99,235,.48); transform:translate(-50%,-50%) scale(.2); box-shadow:0 0 15px rgba(37,99,235,.35), inset 0 0 15px rgba(37,99,235,.12); animation:rexRing 2.8s ease-out infinite; }
+        .rex-ring:nth-child(2){animation-delay:.7s;border-color:rgba(124,58,237,.52)}
+        .rex-ring:nth-child(3){animation-delay:1.4s;border-color:rgba(100,116,139,.35)}
+        @keyframes rexRing { 0%{transform:translate(-50%,-50%) scale(.2);opacity:0} 10%{opacity:1} 100%{transform:translate(-50%,-50%) scale(4.5);opacity:0} }
+        .rex-envelope { position:absolute; left:50%; top:50%; width:150px; height:105px; transform:translate(-50%,-50%) rotate(-3deg); z-index:20; background:linear-gradient(145deg,#ffffff 0%,#dbeafe 20%,#3b82f6 58%,#7c3aed 100%); border-radius:10px; box-shadow:0 0 10px rgba(255,255,255,.8),0 0 24px rgba(37,99,235,.45),0 0 55px rgba(124,58,237,.28); animation:rexFloat 2.8s ease-in-out infinite, rexGlow 1.6s ease-in-out infinite; }
+        .rex-envelope::before { content:""; position:absolute; inset:0; background:linear-gradient(145deg,transparent 48%,rgba(255,255,255,.85) 49%,rgba(255,255,255,.35) 51%,transparent 52%),linear-gradient(215deg,transparent 48%,rgba(255,255,255,.8) 49%,rgba(255,255,255,.3) 51%,transparent 52%); border-radius:inherit; }
+        .rex-flap { position:absolute; left:50%; top:-1px; width:106px; height:106px; transform:translateX(-50%) rotate(45deg); transform-origin:center; background:linear-gradient(135deg,#ffffff,#bfdbfe 28%,#60a5fa 65%,#8b5cf6); border-radius:7px; box-shadow:0 0 12px rgba(37,99,235,.45),0 0 28px rgba(124,58,237,.35); animation:rexOpen 2.8s ease-in-out infinite; z-index:4; }
+        @keyframes rexOpen { 0%,15%{transform:translateX(-50%) rotate(45deg)} 35%,55%,100%{transform:translateX(-50%) translateY(-52px) rotate(18deg) scale(1.03)} }
+        @keyframes rexFloat { 0%,100%{transform:translate(-50%,-50%) rotate(-3deg) scale(1)} 50%{transform:translate(-50%,-53%) rotate(2deg) scale(1.04)} }
+        @keyframes rexGlow { 0%,100%{filter:brightness(1)} 50%{filter:brightness(1.35)} }
+        .rex-core { position:absolute; left:50%; top:50%; width:35px; height:35px; transform:translate(-50%,-50%); border-radius:50%; background:#fff; box-shadow:0 0 8px rgba(255,255,255,.9),0 0 20px rgba(37,99,235,.55),0 0 45px rgba(124,58,237,.4); animation:rexCore 2.8s ease-in-out infinite; z-index:30; }
+        @keyframes rexCore { 0%,20%{transform:translate(-50%,-50%) scale(.2);opacity:0} 35%{transform:translate(-50%,-50%) scale(1);opacity:1} 48%{transform:translate(-50%,-50%) scale(2);opacity:.95} 65%,100%{transform:translate(-50%,-50%) scale(.3);opacity:0} }
+        .rex-arc { position:absolute; left:50%; top:50%; width:270px; height:3px; transform-origin:left center; background:linear-gradient(90deg,#fff,#60a5fa,#8b5cf6,transparent); filter:drop-shadow(0 0 5px rgba(37,99,235,.6)) drop-shadow(0 0 12px rgba(124,58,237,.45)); clip-path:polygon(0 40%,12% 0,18% 75%,30% 20%,42% 100%,55% 10%,68% 75%,80% 0,100% 45%,100% 55%,80% 15%,68% 100%,55% 25%,42% 90%,30% 35%,18% 100%,12% 35%,0 60%); animation:rexArc 1.8s ease-in-out infinite; z-index:15; }
+        .rex-arc:nth-of-type(1){transform:rotate(15deg)} .rex-arc:nth-of-type(2){transform:rotate(95deg);animation-delay:.3s} .rex-arc:nth-of-type(3){transform:rotate(185deg);animation-delay:.6s} .rex-arc:nth-of-type(4){transform:rotate(275deg);animation-delay:.9s}
+        @keyframes rexArc { 0%,100%{opacity:0;width:80px} 30%{opacity:1;width:290px} 60%{opacity:.8;width:230px} }
+        .rex-tag { position:absolute; left:50%; top:50%; padding:6px 10px; border:1px solid rgba(37,99,235,.35); border-radius:5px; background:rgba(255,255,255,.72); color:#334155; font:10px "Courier New",monospace; letter-spacing:.4px; white-space:nowrap; box-shadow:0 0 10px rgba(37,99,235,.16),inset 0 0 8px rgba(37,99,235,.05); opacity:0; z-index:25; animation:rexFly 2.8s cubic-bezier(.15,.75,.25,1) infinite; }
+        .rex-tag:nth-child(8){--x:-170px;--y:-115px;--r:-14deg}.rex-tag:nth-child(9){--x:175px;--y:-100px;--r:12deg;animation-delay:.35s}.rex-tag:nth-child(10){--x:-220px;--y:-15px;--r:-8deg;animation-delay:.55s}.rex-tag:nth-child(11){--x:220px;--y:20px;--r:9deg;animation-delay:.75s}.rex-tag:nth-child(12){--x:-155px;--y:105px;--r:-12deg;animation-delay:.95s}.rex-tag:nth-child(13){--x:155px;--y:115px;--r:11deg;animation-delay:1.15s}.rex-tag:nth-child(14){--x:-55px;--y:-155px;--r:-5deg;animation-delay:.45s}.rex-tag:nth-child(15){--x:70px;--y:155px;--r:6deg;animation-delay:.85s}
+        @keyframes rexFly { 0%,15%{transform:translate(-50%,-50%) scale(.1) rotate(0);opacity:0} 25%{opacity:1} 70%{opacity:1} 100%{transform:translate(calc(-50% + var(--x)),calc(-50% + var(--y))) scale(1) rotate(var(--r));opacity:0} }
+        .rex-at { position:absolute; left:50%; top:50%; color:#fff; font:900 22px Arial,sans-serif; text-shadow:0 0 5px #fff,0 0 12px rgba(37,99,235,.55),0 0 24px rgba(124,58,237,.4); opacity:0; z-index:22; animation:rexAt 2.3s ease-out infinite; }
+        .rex-at:nth-child(16){--x:-130px;--y:-75px;animation-delay:.2s}.rex-at:nth-child(17){--x:135px;--y:-65px;animation-delay:.55s}.rex-at:nth-child(18){--x:-190px;--y:65px;animation-delay:.8s}.rex-at:nth-child(19){--x:190px;--y:75px;animation-delay:1s}.rex-at:nth-child(20){--x:0;--y:-150px;animation-delay:.4s}
+        @keyframes rexAt { 0%,20%{transform:translate(-50%,-50%) scale(.2);opacity:0} 30%{opacity:1} 100%{transform:translate(calc(-50% + var(--x)),calc(-50% + var(--y))) scale(1.15);opacity:0} }
+        .rex-particle { position:absolute; left:50%; top:50%; width:4px; height:4px; border-radius:50%; background:#fff; box-shadow:0 0 7px #fff,0 0 16px rgba(37,99,235,.55),0 0 26px rgba(124,58,237,.45); opacity:0; animation:rexParticle 2s ease-out infinite; }
+        .rex-particle:nth-child(21){--px:-210px;--py:-140px}.rex-particle:nth-child(22){--px:230px;--py:-120px;animation-delay:.2s}.rex-particle:nth-child(23){--px:-240px;--py:30px;animation-delay:.4s}.rex-particle:nth-child(24){--px:245px;--py:50px;animation-delay:.6s}.rex-particle:nth-child(25){--px:-140px;--py:145px;animation-delay:.8s}.rex-particle:nth-child(26){--px:145px;--py:150px;animation-delay:1s}
+        @keyframes rexParticle { 0%,20%{transform:translate(-50%,-50%) scale(.2);opacity:0} 30%{opacity:1} 100%{transform:translate(calc(-50% + var(--px)),calc(-50% + var(--py))) scale(.15);opacity:0} }
+        .rex-flare { position:absolute; left:50%; top:50%; width:300px; height:2px; transform:translate(-50%,-50%); background:linear-gradient(90deg,transparent,rgba(37,99,235,.25),#fff,rgba(124,58,237,.25),transparent); filter:blur(1px) drop-shadow(0 0 10px rgba(37,99,235,.35)); opacity:0; animation:rexFlare 2.8s ease-in-out infinite; z-index:35; }
+        @keyframes rexFlare { 0%,20%{opacity:0;transform:translate(-50%,-50%) scaleX(.2)} 42%{opacity:1;transform:translate(-50%,-50%) scaleX(1)} 70%,100%{opacity:0;transform:translate(-50%,-50%) scaleX(1.4)} }
+        .rex-title { position:absolute; left:50%; bottom:22px; transform:translateX(-50%); width:100%; text-align:center; color:rgba(71,85,105,.72); font:13px Arial,sans-serif; letter-spacing:3px; text-transform:uppercase; text-shadow:0 0 10px rgba(37,99,235,.18); opacity:.8; }
 
-        .envelope-body {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(0, 0, 0, 0.15) 100%);
+        /* Match the animation to the website's light/dark glass UI. */
+        body.dark-theme .raw-email-explosion {
+            background: radial-gradient(circle at 50% 50%, rgba(37,99,235,.12) 0%, rgba(124,58,237,.09) 30%, transparent 68%);
+            border-color: rgba(96,165,250,.13);
+            box-shadow: inset 0 0 90px rgba(37,99,235,.035);
         }
-
-        .status-dot {
-            position: absolute;
-            bottom: 8px;
-            right: 8px;
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: #6366f1;
-            box-shadow: 0 0 8px #6366f1;
-            animation: dotGlow 1.2s infinite alternate;
+        body.dark-theme .raw-email-explosion::before {
+            background: radial-gradient(circle, rgba(37,99,235,.11) 0%, transparent 28%), radial-gradient(circle, rgba(124,58,237,.10) 0%, transparent 30%);
         }
-
-        /* KEYFRAME ANIMATIONS */
-
-        /* Battle Tug Movement */
-        @keyframes battleTug {
-
-            0%,
-            100% {
-                transform: translate(-50%, -50%) rotate(0deg);
-            }
-
-            18% {
-                /* Inbox pulls left */
-                transform: translate(-150%, -50%) rotate(-6deg);
-            }
-
-            32% {
-                /* Spam yanks right */
-                transform: translate(50%, -50%) rotate(7deg);
-            }
-
-            50% {
-                /* Inbox heavy strain */
-                transform: translate(-180%, -52%) rotate(-10deg);
-            }
-
-            68% {
-                /* Spam counter-pull */
-                transform: translate(30%, -48%) rotate(5deg);
-            }
-
-            82% {
-                /* Tension equilibrium */
-                transform: translate(-50%, -53%) rotate(-1deg) scale(1.05);
-            }
+        body.dark-theme .rex-tag {
+            background: rgba(15,23,42,.72);
+            color: #dbeafe;
+            border-color: rgba(96,165,250,.38);
+            box-shadow: 0 0 10px rgba(37,99,235,.18), inset 0 0 8px rgba(37,99,235,.06);
         }
+        body.dark-theme .rex-title { color: rgba(203,213,225,.72); }
 
-        /* Agent Floating &amp; Sway */
-        @keyframes inboxHover {
+        @media(max-width:600px){.raw-email-explosion{height:360px}.rex-stage{transform:translate(-50%,-50%) scale(.75)}.rex-title{font-size:10px;letter-spacing:2px}}
+    </style>
 
-            0%,
-            100% {
-                transform: translateY(0px);
-            }
-
-            18% {
-                transform: translateY(-4px) translateX(-6px);
-            }
-
-            50% {
-                transform: translateY(3px) translateX(-10px);
-            }
-
-            82% {
-                transform: translateY(-2px) translateX(-2px);
-            }
-        }
-
-        @keyframes spamHover {
-
-            0%,
-            100% {
-                transform: translateY(0px);
-            }
-
-            32% {
-                transform: translateY(-5px) translateX(8px);
-            }
-
-            68% {
-                transform: translateY(4px) translateX(6px);
-            }
-
-            82% {
-                transform: translateY(-2px) translateX(2px);
-            }
-        }
-
-        @keyframes tetherPulse {
-            0% {
-                opacity: 0.3;
-                stroke-dashoffset: 0;
-            }
-
-            100% {
-                opacity: 0.8;
-                stroke-dashoffset: 10;
-            }
-        }
-
-        @keyframes dotGlow {
-            from {
-                opacity: 0.4;
-                transform: scale(0.9);
-            }
-
-            to {
-                opacity: 1;
-                transform: scale(1.3);
-            }
-        }
-
-        /* MOBILE RESPONSIVENESS */
-        @media (max-width: 580px) {
-            .battle-arena {
-                padding: 0 10px;
-                height: 240px;
-            }
-
-            .agent-card {
-                width: 95px;
-                height: 115px;
-                padding: 10px 8px;
-                border-radius: 14px;
-            }
-
-            .agent-avatar {
-                width: 38px;
-                height: 38px;
-                border-radius: 10px;
-            }
-
-            .icon-shield {
-                width: 18px;
-                height: 18px;
-            }
-
-            .icon-shield::after {
-                top: 3px;
-                left: 5px;
-                width: 4px;
-                height: 7px;
-            }
-
-            .icon-warning {
-                width: 18px;
-                height: 18px;
-            }
-
-            .icon-warning::before {
-                font-size: 14px;
-                left: 6px;
-                top: -3px;
-            }
-
-            .agent-title {
-                font-size: 10px;
-            }
-
-            .agent-status {
-                font-size: 8px;
-            }
-
-            .envelope {
-                width: 54px;
-                height: 36px;
-            }
-
-            .envelope-flap {
-                border-left-width: 27px;
-                border-right-width: 27px;
-                border-top-width: 19px;
-            }
-
-            .laser-beam {
-                left: 95px;
-                right: 95px;
-            }
-
-            @keyframes battleTug {
-
-                0%,
-                100% {
-                    transform: translate(-50%, -50%) rotate(0deg);
-                }
-
-                18% {
-                    transform: translate(-120%, -50%) rotate(-6deg);
-                }
-
-                32% {
-                    transform: translate(20%, -50%) rotate(7deg);
-                }
-
-                50% {
-                    transform: translate(-135%, -52%) rotate(-10deg);
-                }
-
-                68% {
-                    transform: translate(15%, -48%) rotate(5deg);
-                }
-
-                82% {
-                    transform: translate(-50%, -53%) rotate(-1deg) scale(1.05);
-                }
-            }
-        }
-    &lt;/style&gt;
-&lt;/head&gt;
-
-&lt;body&gt;
-
-    &lt;div class=&quot;battle-arena&quot;&gt;
-        &lt;!-- CONNECTING ENERGY LINE --&gt;
-        &lt;div class=&quot;laser-beam&quot;&gt;&lt;/div&gt;
-
-        &lt;!-- INBOX NODE --&gt;
-        &lt;div class=&quot;agent-card inbox-agent&quot;&gt;
-            &lt;div class=&quot;agent-avatar&quot;&gt;
-                &lt;div class=&quot;icon-shield&quot;&gt;&lt;/div&gt;
-            &lt;/div&gt;
-            &lt;div class=&quot;agent-meta&quot;&gt;
-                &lt;div class=&quot;agent-title&quot;&gt;Inbox&lt;/div&gt;
-                &lt;div class=&quot;agent-status&quot;&gt;Filtering&lt;/div&gt;
-            &lt;/div&gt;
-            &lt;div class=&quot;tether inbox-tether&quot;&gt;&lt;/div&gt;
-        &lt;/div&gt;
-
-        &lt;!-- PRIZE ENVELOPE --&gt;
-        &lt;div class=&quot;envelope-wrapper&quot;&gt;
-            &lt;div class=&quot;envelope&quot;&gt;
-                &lt;div class=&quot;envelope-flap&quot;&gt;&lt;/div&gt;
-                &lt;div class=&quot;envelope-body&quot;&gt;&lt;/div&gt;
-                &lt;div class=&quot;status-dot&quot;&gt;&lt;/div&gt;
-            &lt;/div&gt;
-        &lt;/div&gt;
-
-        &lt;!-- SPAM NODE --&gt;
-        &lt;div class=&quot;agent-card spam-agent&quot;&gt;
-            &lt;div class=&quot;agent-avatar&quot;&gt;
-                &lt;div class=&quot;icon-warning&quot;&gt;&lt;/div&gt;
-            &lt;/div&gt;
-            &lt;div class=&quot;agent-meta&quot;&gt;
-                &lt;div class=&quot;agent-title&quot;&gt;Spam&lt;/div&gt;
-                &lt;div class=&quot;agent-status&quot;&gt;Blocked&lt;/div&gt;
-            &lt;/div&gt;
-            &lt;div class=&quot;tether spam-tether&quot;&gt;&lt;/div&gt;
-        &lt;/div&gt;
-    &lt;/div&gt;
-
-&lt;/body&gt;
-
-&lt;/html&gt;" style="display:block;width:100%;height:340px;border:0;background:transparent;overflow:hidden;"
-            loading="lazy" scrolling="no">
-        </iframe>
+    <div class="raw-email-explosion">
+        <div class="rex-stage">
+            <div class="rex-ring"></div><div class="rex-ring"></div><div class="rex-ring"></div>
+            <div class="rex-arc"></div><div class="rex-arc"></div><div class="rex-arc"></div><div class="rex-arc"></div>
+            <div class="rex-flare"></div>
+            <div class="rex-envelope"><div class="rex-flap"></div></div>
+            <div class="rex-core"></div>
+            <div class="rex-tag">user@gmail.com</div><div class="rex-tag">contact@yahoo.com</div><div class="rex-tag">admin@outlook.com</div><div class="rex-tag">support@company.com</div><div class="rex-tag">hello@domain.com</div><div class="rex-tag">info@website.com</div><div class="rex-tag">mail@service.com</div><div class="rex-tag">user@inbox.com</div>
+            <div class="rex-at">@</div><div class="rex-at">@</div><div class="rex-at">@</div><div class="rex-at">@</div><div class="rex-at">@</div>
+            <div class="rex-particle"></div><div class="rex-particle"></div><div class="rex-particle"></div><div class="rex-particle"></div><div class="rex-particle"></div><div class="rex-particle"></div>
+        </div>
+        <div class="rex-title">RAW EMAIL • ADDRESS EXTRACTION • INBOX INTELLIGENCE</div>
     </div>
 </body>
 
