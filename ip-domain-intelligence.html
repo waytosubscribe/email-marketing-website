@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IP & Domain Intelligence</title>
+<style>
+:root{
+ --bg:#f5f7fb;--panel:#fff;--panel2:#f8fafc;--text:#172033;--muted:#667085;
+ --line:#e5e7eb;--accent:#4f46e5;--accent2:#7c3aed;--good:#16a34a;--bad:#dc2626;--warn:#d97706;
+ --shadow:0 12px 34px rgba(15,23,42,.08)
+}
+*{box-sizing:border-box}
+body{margin:0;background:linear-gradient(135deg,#f8fafc,#eef2ff);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;color:var(--text)}
+button,input,textarea,select{font:inherit}
+.app{max-width:1450px;margin:auto;padding:18px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:16px}
+.brand{display:flex;align-items:center;gap:12px}.logo{width:42px;height:42px;border-radius:13px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;display:grid;place-items:center;font-weight:900;box-shadow:0 9px 22px rgba(79,70,229,.25)}
+.brand h1{font-size:19px;margin:0}.brand p{margin:3px 0 0;color:var(--muted);font-size:12px}
+.actions{display:flex;gap:8px;align-items:center}
+.btn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px 13px;cursor:pointer;font-weight:700;color:#344054}
+.btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border-color:transparent}.btn.danger{color:#b42318}
+.quick{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.quick button{text-align:left;border:1px solid var(--line);background:rgba(255,255,255,.86);padding:14px;border-radius:14px;cursor:pointer;box-shadow:var(--shadow)}
+.quick button.active{border-color:#8b5cf6;box-shadow:0 0 0 2px rgba(124,58,237,.12)}
+.qtitle{font-weight:800}.qdesc{font-size:12px;color:var(--muted);margin-top:4px}
+.layout{display:grid;grid-template-columns:320px 1fr;gap:14px}
+.card{background:rgba(255,255,255,.92);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow)}
+.side{padding:14px;height:max-content;position:sticky;top:14px}
+.side h3{margin:0 0 12px;font-size:14px}.side button{width:100%;text-align:left;background:transparent;border:0;border-radius:10px;padding:11px;cursor:pointer;margin:2px 0;color:#344054;font-weight:700}.side button.active{background:#eef2ff;color:#4338ca}
+.main{padding:16px}.section{display:none}.section.active{display:block}
+.head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:13px}.head h2{margin:0;font-size:18px}.head p{margin:4px 0 0;color:var(--muted);font-size:12px}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+textarea,input,select{border:1px solid var(--line);border-radius:10px;background:#fff;padding:10px 11px;outline:none}
+textarea:focus,input:focus,select:focus{border-color:#8b5cf6;box-shadow:0 0 0 3px rgba(124,58,237,.1)}
+textarea.bulk{width:100%;min-height:145px;resize:vertical}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0}
+.stat{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:13px}.stat b{font-size:21px}.stat span{display:block;font-size:11px;color:var(--muted);margin-top:3px}
+.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:12px}.table{width:100%;border-collapse:collapse;font-size:12px;min-width:850px}.table th,.table td{padding:10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}.table th{background:#f8fafc;font-size:11px;color:#475467}.table tr:last-child td{border-bottom:0}
+.badge{display:inline-flex;padding:4px 8px;border-radius:999px;font-weight:800;font-size:10px}.ok{background:#dcfce7;color:#166534}.bad{background:#fee2e2;color:#991b1b}.unknown{background:#fef3c7;color:#92400e}
+.resultbox{background:#0f172a;color:#dbeafe;border-radius:12px;padding:12px;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12px;white-space:pre-wrap;max-height:420px;overflow:auto}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.mini{padding:13px;border:1px solid var(--line);border-radius:12px;background:#fff}.mini h4{margin:0 0 8px}.kv{display:grid;grid-template-columns:120px 1fr;gap:6px;font-size:12px}.kv span{color:var(--muted)}
+.notice{padding:10px 12px;border-radius:10px;background:#fffbeb;border:1px solid #fde68a;color:#92400e;font-size:12px;margin:10px 0}
+.footer{font-size:11px;color:var(--muted);margin-top:14px;text-align:center}
+@media(max-width:1000px){.layout{grid-template-columns:1fr}.side{position:static}.quick{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:repeat(2,1fr)}.cards{grid-template-columns:1fr}}
+@media(max-width:600px){.app{padding:10px}.top{align-items:flex-start}.quick{grid-template-columns:1fr}.grid{grid-template-columns:1fr}.actions{display:none}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="brand"><div class="logo">IP</div><div><h1>IP & Domain Intelligence</h1><p>Blacklist • DNS • ASN • WHOIS • Provider • Data Center</p></div></div>
+    <div class="actions"><button class="btn" onclick="loadExample()">Example</button><button class="btn danger" onclick="resetAll()">Reset</button></div>
+  </header>
+
+  <div class="quick">
+    <button class="active" data-tab="blacklist" onclick="showTab('blacklist')"><div class="qtitle">Blacklist Checker</div><div class="qdesc">Spamhaus • Barracuda • SpamCop</div></button>
+    <button data-tab="dns" onclick="showTab('dns')"><div class="qtitle">Bulk DNS Lookup</div><div class="qdesc">A • AAAA • MX • TXT • NS • CNAME</div></button>
+    <button data-tab="ipintel" onclick="showTab('ipintel')"><div class="qtitle">IP Intelligence</div><div class="qdesc">ASN • Provider • ISP • Data Center</div></button>
+    <button data-tab="whois" onclick="showTab('whois')"><div class="qtitle">IP WHOIS / RDAP</div><div class="qdesc">Network • Registry • Contacts</div></button>
+  </div>
+
+  <div class="layout">
+    <aside class="card side">
+      <h3>Quick Access</h3>
+      <button class="active" data-side="blacklist" onclick="showTab('blacklist')">🛡️ Blacklist Checker</button>
+      <button data-side="dns" onclick="showTab('dns')">◈ Bulk DNS Lookup</button>
+      <button data-side="ipintel" onclick="showTab('ipintel')">◉ IP Intelligence</button>
+      <button data-side="whois" onclick="showTab('whois')">⌕ IP WHOIS / RDAP</button>
+      <hr style="border:0;border-top:1px solid var(--line);margin:12px 0">
+      <div style="font-size:11px;color:var(--muted);line-height:1.5">
+        Paste one item per line for bulk work. Results stay in this page and can be exported.
+      </div>
+    </aside>
+
+    <main class="card main">
+      <section id="blacklist" class="section active">
+        <div class="head"><div><h2>IP & Domain Blacklist Checker</h2><p>Check reputation sources from one place.</p></div><button class="btn" onclick="exportTable('blTable','blacklist-results.csv')">Export CSV</button></div>
+        <div class="toolbar">
+          <select id="blType"><option value="ip">IP addresses</option><option value="domain">Domains</option></select>
+          <button class="btn" onclick="useCurrentAs('blInput')">Use example</button>
+          <button class="btn primary" onclick="runBlacklist()">Check All</button>
+        </div>
+        <textarea id="blInput" class="bulk" placeholder="One IP or domain per line&#10;Example:&#10;8.8.8.8&#10;1.1.1.1"></textarea>
+        <div class="notice"><b>Important:</b> Spamhaus production DNSBL/API access has query/authentication requirements. This browser-only page does not expose a Spamhaus key. Barracuda and SpamCop checks use DNS-over-HTTPS where the resolver/provider permits the query. For reliable production bulk checks, connect a server-side DNSBL worker.</div>
+        <div class="grid"><div class="stat"><b id="blTotal">0</b><span>Total</span></div><div class="stat"><b id="blListed">0</b><span>Listed</span></div><div class="stat"><b id="blClear">0</b><span>Clear</span></div><div class="stat"><b id="blUnknown">0</b><span>Unknown / blocked</span></div></div>
+        <div class="tablewrap"><table class="table" id="blTable"><thead><tr><th>Target</th><th>Spamhaus</th><th>Barracuda</th><th>SpamCop</th><th>Overall</th></tr></thead><tbody><tr><td colspan="5">Run a check to see results.</td></tr></tbody></table></div>
+      </section>
+
+      <section id="dns" class="section">
+        <div class="head"><div><h2>Bulk DNS Lookup</h2><p>Query multiple domains and record types without leaving the page.</p></div><button class="btn" onclick="exportTable('dnsTable','dns-results.csv')">Export CSV</button></div>
+        <div class="toolbar"><select id="dnsType"><option>A</option><option>AAAA</option><option>MX</option><option>TXT</option><option>NS</option><option>CNAME</option><option>SOA</option><option>PTR</option></select><button class="btn primary" onclick="runDNS()">Lookup All</button></div>
+        <textarea id="dnsInput" class="bulk" placeholder="One domain per line&#10;example.com&#10;gmail.com&#10;yahoo.com"></textarea>
+        <div class="tablewrap"><table class="table" id="dnsTable"><thead><tr><th>Domain</th><th>Type</th><th>Status</th><th>Answer</th><th>TTL</th></tr></thead><tbody><tr><td colspan="5">Enter domains and click Lookup All.</td></tr></tbody></table></div>
+      </section>
+
+      <section id="ipintel" class="section">
+        <div class="head"><div><h2>Bulk IP Intelligence</h2><p>ASN, network provider, ISP, location and hosting indicators.</p></div><button class="btn" onclick="exportTable('ipTable','ip-intelligence.csv')">Export CSV</button></div>
+        <div class="toolbar"><button class="btn primary" onclick="runIPIntel()">Lookup All IPs</button></div>
+        <textarea id="ipInput" class="bulk" placeholder="One IPv4 or IPv6 address per line&#10;8.8.8.8&#10;1.1.1.1"></textarea>
+        <div class="tablewrap"><table class="table" id="ipTable"><thead><tr><th>IP</th><th>ASN</th><th>ASN Organization</th><th>ISP / Provider</th><th>Organization</th><th>Location</th><th>Hosting / DC signal</th></tr></thead><tbody><tr><td colspan="7">Enter IPs and click Lookup All.</td></tr></tbody></table></div>
+      </section>
+
+      <section id="whois" class="section">
+        <div class="head"><div><h2>IP WHOIS / RDAP Lookup</h2><p>Registry network details for IPv4 and IPv6 addresses.</p></div></div>
+        <div class="toolbar"><button class="btn primary" onclick="runWhois()">Lookup All</button><button class="btn" onclick="copyWhois()">Copy JSON</button></div>
+        <textarea id="whoisInput" class="bulk" placeholder="One IP per line&#10;8.8.8.8"></textarea>
+        <div id="whoisCards" class="cards"></div>
+        <pre id="whoisRaw" class="resultbox" style="display:none"></pre>
+      </section>
+    </main>
+  </div>
+  <div class="footer">Use the results as operational intelligence, not as a sole basis for blocking mail or traffic. Data availability depends on the upstream provider.</div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const lines=id=>$(id).value.split(/[\n,;]+/).map(x=>x.trim()).filter(Boolean);
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+function showTab(id){
+ document.querySelectorAll('.section').forEach(x=>x.classList.toggle('active',x.id===id));
+ document.querySelectorAll('[data-tab]').forEach(x=>x.classList.toggle('active',x.dataset.tab===id));
+ document.querySelectorAll('[data-side]').forEach(x=>x.classList.toggle('active',x.dataset.side===id));
+}
+function loadExample(){
+ $('blInput').value='8.8.8.8\\n1.1.1.1'; $('dnsInput').value='example.com\\ngmail.com\\nyahoo.com'; $('ipInput').value='8.8.8.8\\n1.1.1.1'; $('whoisInput').value='8.8.8.8'; showTab('blacklist');
+}
+function useCurrentAs(id){$(id).value='8.8.8.8\\n1.1.1.1'}
+function resetAll(){['blInput','dnsInput','ipInput','whoisInput'].forEach(id=>$(id).value='');document.querySelectorAll('tbody').forEach(t=>t.innerHTML='<tr><td colspan="8">Ready.</td></tr>');$('whoisCards').innerHTML='';$('whoisRaw').style.display='none'}
+async function doh(name,type){
+ const u='https://dns.google/resolve?name='+encodeURIComponent(name)+'&type='+encodeURIComponent(type);
+ const r=await fetch(u,{headers:{Accept:'application/dns-json'}}); if(!r.ok)throw new Error('DNS HTTP '+r.status); return r.json();
+}
+function reverseIPv4(ip){return ip.split('.').reverse().join('.')+'.'}
+async function dnsbl(ip,zone){
+ if(!/^\\d{1,3}(\\.\\d{1,3}){3}$/.test(ip)) return {status:'N/A',detail:'DNSBL IP check shown for IPv4'};
+ const q=reverseIPv4(ip)+zone;
+ try{const d=await doh(q,'A');return d.Answer&&d.Answer.length?{status:'LISTED',detail:d.Answer.map(a=>a.data).join(', ')}:{status:'CLEAR',detail:'No DNSBL answer'}}catch(e){return {status:'UNKNOWN',detail:e.message}}
+}
+async function runBlacklist(){
+ const vals=lines('blInput'),type=$('blType').value, body=$('blTable').querySelector('tbody');
+ body.innerHTML=''; let listed=0,clear=0,unknown=0;
+ $('blTotal').textContent=vals.length;
+ for(const target of vals){
+  const tr=document.createElement('tr'); tr.innerHTML='<td>'+esc(target)+'</td><td>Checking…</td><td>Checking…</td><td>Checking…</td><td>Checking…</td>';body.appendChild(tr);
+  if(type==='domain'){
+   tr.cells[1].innerHTML='<span class="badge unknown">AUTH / API</span>';
+   tr.cells[2].innerHTML='<span class="badge unknown">IP LIST</span>';
+   tr.cells[3].innerHTML='<span class="badge unknown">IP LIST</span>';
+   tr.cells[4].innerHTML='<span class="badge unknown">DOMAIN MODE</span>'; unknown++; continue;
+  }
+  const [b,sc]=await Promise.all([dnsbl(target,'b.barracudacentral.org'),dnsbl(target,'bl.spamcop.net')]);
+  const sh={status:'AUTH/API',detail:'Server-side key required'};
+  const render=x=>'<span class="badge '+(x.status==='LISTED'?'bad':x.status==='CLEAR'?'ok':'unknown')+'">'+esc(x.status)+'</span>';
+  tr.cells[1].innerHTML=render(sh); tr.cells[2].innerHTML=render(b); tr.cells[3].innerHTML=render(sc);
+  const states=[b.status,sc.status]; const overall=states.includes('LISTED')?'LISTED':states.every(x=>x==='CLEAR')?'CLEAR':'UNKNOWN';
+  tr.cells[4].innerHTML=render({status:overall}); if(overall==='LISTED')listed++;else if(overall==='CLEAR')clear++;else unknown++;
+  await sleep(30);
+ }
+ $('blListed').textContent=listed;$('blClear').textContent=clear;$('blUnknown').textContent=unknown;
+}
+async function runDNS(){
+ const vals=lines('dnsInput'),type=$('dnsType').value,body=$('dnsTable').querySelector('tbody');body.innerHTML='';
+ for(const domain of vals){
+  const tr=document.createElement('tr');tr.innerHTML='<td>'+esc(domain)+'</td><td>'+type+'</td><td>Checking…</td><td></td><td></td>';body.appendChild(tr);
+  try{const d=await doh(domain,type);const ans=d.Answer||[];tr.cells[2].innerHTML='<span class="badge '+(ans.length?'ok':'unknown')+'">'+(ans.length?'FOUND':'NO ANSWER')+'</span>';tr.cells[3].textContent=ans.map(a=>a.data).join(' | ')||'—';tr.cells[4].textContent=ans.map(a=>a.TTL).join(', ')||'—'}catch(e){tr.cells[2].innerHTML='<span class="badge bad">ERROR</span>';tr.cells[3].textContent=e.message}
+ }
+}
+async function ipInfo(ip){
+ const [a,b]=await Promise.allSettled([
+  fetch('https://api.ip.sb/geoip/'+encodeURIComponent(ip)).then(r=>r.json()),
+  fetch('https://ipapi.co/'+encodeURIComponent(ip)+'/json/').then(r=>r.json())
+ ]);
+ const x=a.status==='fulfilled'&&!a.value.error?a.value:{};
+ const y=b.status==='fulfilled'&&!b.value.error?b.value:{};
+ return {...y,...x,asn:x.asn?('AS'+x.asn):y.asn,asn_organization:x.asn_organization||'',isp:x.isp||'',organization:x.organization||y.org||''};
+}
+function hostSignal(x){
+ const s=(x.organization+' '+x.isp+' '+x.asn_organization).toLowerCase();
+ const words=['cloud','hosting','host','server','data center','datacenter','digitalocean','amazon','aws','microsoft','azure','google cloud','oracle','ovh','hetzner','vultr','linode'];
+ return words.some(w=>s.includes(w))?'Possible hosting / data-center network':'Not determined by free lookup';
+}
+async function runIPIntel(){
+ const vals=lines('ipInput'),body=$('ipTable').querySelector('tbody');body.innerHTML='';
+ for(const ip of vals){
+  const tr=document.createElement('tr');tr.innerHTML='<td>'+esc(ip)+'</td><td colspan="6">Loading…</td>';body.appendChild(tr);
+  try{const x=await ipInfo(ip);const loc=[x.city,x.region,x.country].filter(Boolean).join(', ');tr.innerHTML='<td>'+esc(ip)+'</td><td>'+esc(x.asn||'—')+'</td><td>'+esc(x.asn_organization||'—')+'</td><td>'+esc(x.isp||'—')+'</td><td>'+esc(x.organization||'—')+'</td><td>'+esc(loc||'—')+'</td><td>'+esc(hostSignal(x))+'</td>'}catch(e){tr.cells[1].textContent='Lookup error: '+e.message}
+ }
+}
+let whoisData=[];
+function pick(obj,...paths){for(const p of paths){let v=p.split('.').reduce((a,k)=>a?.[k],obj);if(v!==undefined&&v!==null&&v!=='')return v}return '—'}
+async function runWhois(){
+ const vals=lines('whoisInput');whoisData=[];$('whoisCards').innerHTML='';$('whoisRaw').style.display='none';
+ for(const ip of vals){
+  const card=document.createElement('div');card.className='mini';card.innerHTML='<h4>'+esc(ip)+'</h4><div>Loading RDAP…</div>';$('whoisCards').appendChild(card);
+  try{const r=await fetch('https://rdap.arin.net/bootstrap/ip/'+encodeURIComponent(ip));const d=await r.json();whoisData.push(d);
+   const name=pick(d,'name','handle');const start=pick(d,'startAddress');const end=pick(d,'endAddress');const cidr=pick(d,'cidr0_cidrs.0.v4prefix','cidr0_cidrs.0.v6prefix');const country=pick(d,'country');const parent=pick(d,'parentHandle');const status=Array.isArray(d.status)?d.status.join(', '):pick(d,'status');
+   card.innerHTML='<h4>'+esc(ip)+'</h4><div class="kv"><span>Network</span><b>'+esc(name)+'</b><span>Range</span><b>'+esc(start)+' – '+esc(end)+'</b><span>CIDR</span><b>'+esc(cidr)+'</b><span>Country</span><b>'+esc(country)+'</b><span>Parent</span><b>'+esc(parent)+'</b><span>Status</span><b>'+esc(status)+'</b></div>'
+  }catch(e){card.innerHTML='<h4>'+esc(ip)+'</h4><span class="badge bad">RDAP ERROR</span><p style="font-size:12px;color:var(--muted)">'+esc(e.message)+'</p>'}
+ }
+ $('whoisRaw').textContent=JSON.stringify(whoisData,null,2);
+}
+function copyWhois(){navigator.clipboard?.writeText(JSON.stringify(whoisData,null,2))}
+function exportTable(id,filename){
+ const table=$(id);if(!table)return;const rows=[...table.querySelectorAll('tr')].map(tr=>[...tr.children].map(td=>'"'+td.innerText.replace(/"/g,'""').replace(/\n/g,' ')+'"').join(',')).join('\\n');
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([rows],{type:'text/csv'}));a.download=filename;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500);
+}
+</script>
+</body>
+</html>
