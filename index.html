@@ -1033,9 +1033,8 @@ All Available Messages
                     <div>
                         <h2>Raw Message Domain Filter</h2>
                         <div class="raw-filter-help">
-                            Reads the complete raw Gmail message content already retrieved by the extractor.
-                            Enter a domain such as <strong>example.com</strong> to keep only email addresses
-                            found in raw messages that contain that domain.
+                            Choose how you want to extract email addresses from the complete raw Gmail messages.
+                            You can either check a specific domain or extract all email addresses without any domain check.
                         </div>
                     </div>
                 </div>
@@ -1060,7 +1059,16 @@ All Available Messages
                         id="domainFilterBtn"
                         onclick="filterByRawDomain()"
                         disabled>
-                        Check &amp; Extract
+                        Check Domain &amp; Extract
+                    </button>
+
+                    <button
+                        type="button"
+                        class="raw-filter-btn"
+                        id="extractAllRawBtn"
+                        onclick="extractAllRawEmails()"
+                        disabled>
+                        Extract All Emails
                     </button>
 
                     <button
@@ -1690,6 +1698,14 @@ document.getElementById(
 "domainFilterBtn"
 ).disabled = false;
 
+document.getElementById(
+"extractAllRawBtn"
+).disabled = false;
+
+document.getElementById(
+"domainFilterBtn"
+).disabled = false;
+
 }
 
 });
@@ -1775,6 +1791,14 @@ document.getElementById(
 
 document.getElementById(
 "extractBtn"
+).disabled = true;
+
+document.getElementById(
+"domainFilterBtn"
+).disabled = true;
+
+document.getElementById(
+"extractAllRawBtn"
 ).disabled = true;
 
 }
@@ -2347,6 +2371,89 @@ async function filterByRawDomain() {
     }
 }
 
+async function extractAllRawEmails() {
+    if (!accessToken) {
+        setStatus("Please connect Gmail first.");
+        return;
+    }
+
+    const maxMessages =
+        parseInt(
+            document.getElementById("maxMessages").value,
+            10
+        ) || 1000;
+
+    const query = buildDateQuery();
+
+    if (query === null) {
+        return;
+    }
+
+    const signature = getCurrentSearchSignature(query, maxMessages);
+
+    /*
+     * Reuse the raw-message cache when the current date/message settings
+     * are identical. Otherwise load the requested messages first.
+     */
+    if (
+        rawMessageCache.size === 0 ||
+        rawMessageSearchSignature !== signature
+    ) {
+        await extractAddresses();
+    }
+
+    if (!rawMessageCache.size) {
+        setStatus("No raw messages are available to extract.");
+        setRawFilterResult("No raw messages were loaded.", true);
+        return;
+    }
+
+    const domainButton = document.getElementById("domainFilterBtn");
+    const allButton = document.getElementById("extractAllRawBtn");
+
+    domainButton.disabled = true;
+    allButton.disabled = true;
+
+    try {
+        setStatus("Extracting all email addresses from raw messages...");
+
+        emailAddresses.clear();
+
+        for (const raw of rawMessageCache.values()) {
+            extractEmailsFromText(raw);
+        }
+
+        categorizeEmails();
+
+        document.getElementById("emailResults").value =
+            Array.from(emailAddresses).sort().join("\n");
+
+        document.getElementById("uniqueCount").textContent =
+            emailAddresses.size;
+
+        document.getElementById("domainCount").textContent =
+            new Set(
+                Array.from(emailAddresses)
+                    .map(email => email.split("@")[1])
+            ).size;
+
+        const messageCount = rawMessageCache.size;
+
+        setRawFilterResult(
+            `${messageCount} raw message(s) scanned. ${emailAddresses.size} unique email address(es) were extracted from all raw messages. No domain filter was applied.`,
+            true
+        );
+
+        setStatus(
+            `All-email extraction completed: ${emailAddresses.size} unique email addresses found from ${messageCount} raw message(s).`
+        );
+    } finally {
+        domainButton.disabled = false;
+        allButton.disabled = false;
+    }
+}
+
+
 function clearDomainFilter() {
     const input = document.getElementById("domainFilter");
 
@@ -2741,6 +2848,10 @@ document.getElementById(
 "domainFilterBtn"
 ).disabled = true;
 
+document.getElementById(
+"extractAllRawBtn"
+).disabled = true;
+
 setRawFilterResult("", false);
 
 document.getElementById(
@@ -2808,6 +2919,10 @@ document.getElementById(
 
 document.getElementById(
 "domainFilterBtn"
+).disabled = !accessToken;
+
+document.getElementById(
+"extractAllRawBtn"
 ).disabled = !accessToken;
 
 }
