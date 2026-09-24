@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="HTML Email Editor with syntax highlighting, live preview, validation and email-safe code tools.">
+<title>HTML Email Editor — Email Address Intelligence</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material-darker.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/show-hint.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/lint/lint.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/xml/xml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/css/css.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/htmlmixed/htmlmixed.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/php/php.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/show-hint.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/xml-hint.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/html-hint.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closetag.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
+
+<style>
+*{box-sizing:border-box}
+:root{--bg:#f5f7fb;--card:rgba(255,255,255,.9);--panel:#fff;--border:rgba(15,23,42,.1);--text:#0f172a;--muted:#64748b;--blue:#2563eb;--purple:#7c3aed;--green:#16a34a;--red:#dc2626;--shadow:0 18px 55px rgba(15,23,42,.08)}
+body{margin:0;min-height:100vh;font-family:Inter,Arial,sans-serif;color:var(--text);background:radial-gradient(circle at 8% 5%,rgba(37,99,235,.11),transparent 28%),radial-gradient(circle at 92% 18%,rgba(124,58,237,.1),transparent 27%),linear-gradient(180deg,#f8fafc,#eef2f7);background-attachment:fixed}
+body.dark-theme{--bg:#070b14;--card:rgba(15,23,42,.82);--panel:#0b1220;--border:rgba(255,255,255,.1);--text:#f8fafc;--muted:#94a3b8;--shadow:0 22px 70px rgba(0,0,0,.34);background:radial-gradient(circle at 12% 8%,rgba(37,99,235,.18),transparent 28%),radial-gradient(circle at 88% 25%,rgba(124,58,237,.16),transparent 30%),#070b14}
+.container{max-width:1400px;margin:auto;padding:25px 20px 60px}.topbar{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:18px;flex-wrap:wrap}.brand{display:flex;align-items:center;gap:12px}.brand-icon{width:48px;height:48px;border-radius:15px;background:linear-gradient(135deg,#2563eb,#7c3aed);display:grid;place-items:center;color:#fff;font-size:23px;box-shadow:0 12px 30px rgba(37,99,235,.25)}.brand h1{font-size:23px;margin:0}.brand p{margin:3px 0 0;color:var(--muted);font-size:13px}.nav-actions{display:flex;gap:8px;flex-wrap:wrap}.btn{border:0;border-radius:11px;padding:10px 14px;font-weight:700;cursor:pointer;color:#fff;background:linear-gradient(135deg,#2563eb,#4f46e5);transition:.2s}.btn:hover{transform:translateY(-1px);filter:brightness(1.05)}.btn.secondary{background:rgba(100,116,139,.14);color:var(--text);border:1px solid var(--border)}.btn.green{background:linear-gradient(135deg,#16a34a,#15803d)}.btn.red{background:linear-gradient(135deg,#dc2626,#b91c1c)}.btn.purple{background:linear-gradient(135deg,#7c3aed,#5b21b6)}.theme-toggle{position:fixed;right:18px;bottom:18px;z-index:20;border:1px solid var(--border);background:var(--card);color:var(--text);border-radius:999px;padding:8px 12px;cursor:pointer;box-shadow:var(--shadow)}
+.card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:18px;box-shadow:var(--shadow);backdrop-filter:blur(18px);margin-bottom:16px}.toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.toolbar select,.toolbar input{height:38px;border:1px solid var(--border);border-radius:9px;background:var(--panel);color:var(--text);padding:0 10px}.toolbar label{font-size:12px;font-weight:700;color:var(--muted)}
+.editor-grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(360px,.85fr);gap:16px}.editor-card,.preview-card{min-height:680px}.section-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}.section-head h2{margin:0;font-size:17px}.badge{font-size:11px;padding:5px 8px;border-radius:99px;background:rgba(37,99,235,.1);color:var(--blue);font-weight:800}.CodeMirror{height:590px;border:1px solid var(--border);border-radius:13px;font-size:13px;line-height:1.55}.CodeMirror-scroll{border-radius:13px}.editor-footer{display:flex;justify-content:space-between;gap:10px;margin-top:10px;color:var(--muted);font-size:12px;flex-wrap:wrap}.status-ok{color:var(--green);font-weight:700}.status-error{color:var(--red);font-weight:700}
+.preview-frame{width:100%;height:590px;border:1px solid var(--border);border-radius:13px;background:#fff}.preview-note{font-size:12px;color:var(--muted);margin-top:9px}.tabs{display:flex;gap:6px;margin-bottom:10px}.tab{border:1px solid var(--border);background:var(--panel);color:var(--text);border-radius:9px;padding:8px 11px;font-size:12px;font-weight:700;cursor:pointer}.tab.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+.tool-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.tool{border:1px solid var(--border);border-radius:15px;padding:15px;background:var(--panel)}.tool h3{font-size:14px;margin:0 0 6px}.tool p{font-size:12px;color:var(--muted);line-height:1.55;margin:0 0 12px}.tool-row{display:flex;gap:7px;flex-wrap:wrap}.tool-row .btn{font-size:12px;padding:8px 10px}.tool select{width:100%;height:38px;border:1px solid var(--border);border-radius:9px;background:var(--panel);color:var(--text);padding:0 8px}
+.wysiwyg{display:none}.wysiwyg.active{display:block}.wysiwyg-area{height:590px;overflow:auto;border:1px solid var(--border);border-radius:13px;background:#fff;color:#111;padding:24px;outline:none}.wysiwyg-area:focus{box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+.help{font-size:12px;color:var(--muted);line-height:1.65}.hide-dropdown{position:relative}.hide-menu{position:absolute;right:0;top:calc(100% + 8px);width:330px;padding:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;box-shadow:0 18px 45px rgba(15,23,42,.16);z-index:50;display:none}.hide-dropdown.open .hide-menu{display:block}.hide-menu-title{font-size:13px;font-weight:800;margin-bottom:8px}.hide-menu .hide-option{margin-bottom:7px;background:transparent}.hide-menu .hide-option:last-of-type{margin-bottom:0}.hide-menu-actions{display:flex;gap:8px;margin-top:10px}.hide-menu-actions .btn{flex:1}.hide-menu small{font-size:11px}.warning{padding:11px 13px;border-radius:11px;background:rgba(234,88,12,.08);border:1px solid rgba(234,88,12,.16);color:#9a3412;font-size:12px;margin-top:10px}.dark-theme .warning{color:#fdba74}.hide-options{display:grid;gap:9px}.hide-option{display:flex;gap:10px;align-items:flex-start;padding:10px;border:1px solid var(--border);border-radius:11px}.hide-option input{margin-top:3px}.hide-option strong{font-size:12px}.hide-option small{display:block;color:var(--muted);line-height:1.45;margin-top:3px}.log{font-family:Consolas,monospace;font-size:12px;background:rgba(15,23,42,.06);border-radius:10px;padding:10px;min-height:50px;color:var(--muted);white-space:pre-wrap}.dark-theme .log{background:rgba(255,255,255,.05)}
+@media(max-width:1050px){.editor-grid{grid-template-columns:1fr}.editor-card,.preview-card{min-height:auto}.tool-grid{grid-template-columns:1fr 1fr}}@media(max-width:650px){.container{padding:16px 11px 50px}.tool-grid{grid-template-columns:1fr}.CodeMirror,.preview-frame,.wysiwyg-area{height:500px}.brand h1{font-size:19px}}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="topbar">
+    <div class="brand"><div class="brand-icon">&lt;/&gt;</div><div><h1>HTML Email Editor</h1><p>Build, validate, preview and prepare email HTML in one workspace.</p></div></div>
+    <div class="nav-actions">
+      <a class="btn secondary" href="index.html" style="text-decoration:none">← Email Extractor</a>
+      <button class="btn secondary" id="newBtn">New</button>
+      <button class="btn secondary" id="loadBtn">Load HTML</button><input type="file" id="fileInput" accept=".html,.htm,.txt" hidden>
+      <button class="btn green" id="downloadBtn">Download HTML</button>
+      <div class="hide-dropdown" id="hideDropdown">
+        <button class="btn purple" id="hideOptionsBtn" type="button">Hide Options ▾</button>
+        <div class="hide-menu" id="hideMenu">
+          <div class="hide-menu-title">Choose a body hiding method</div>
+          <label class="hide-option"><input type="radio" name="hideMode" value="span" checked><span><strong>SPAN display:none</strong><small>&lt;span style="display:none;"&gt;...&lt;/span&gt;</small></span></label>
+          <label class="hide-option"><input type="radio" name="hideMode" value="div"><span><strong>DIV display:none + mso-hide</strong><small>&lt;div style="display:none !important; mso-hide:all;"&gt;...&lt;/div&gt;</small></span></label>
+          <label class="hide-option"><input type="radio" name="hideMode" value="comment"><span><strong>HTML Comment</strong><small>&lt;!-- ... --&gt; makes the wrapped content non-rendering.</small></span></label>
+          <div class="hide-menu-actions">
+            <button class="btn purple" id="hideBodyBtn" type="button">Apply Hide</button>
+            <button class="btn green" id="showBodyBtn" type="button">Restore</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="toolbar">
+      <label>Language</label><select id="language"><option value="htmlmixed">HTML</option><option value="css">CSS</option><option value="javascript">JavaScript</option><option value="php">PHP</option><option value="xml">XML</option></select>
+      <label>Theme</label><select id="editorTheme"><option value="default">Light</option><option value="material-darker">Material Darker</option></select>
+      <button class="btn" id="formatBtn">Format</button><button class="btn secondary" id="validateBtn">Check Errors</button><button class="btn purple" id="previewBtn">Refresh Preview</button>
+    </div>
+  </div>
+
+  <div class="editor-grid">
+    <section class="card editor-card">
+      <div class="section-head"><h2>Code Editor</h2><span class="badge" id="editorStatus">Ready</span></div>
+      <div id="codeEditor"></div>
+      <div class="editor-footer"><span id="cursorInfo">Line 1, Col 1</span><span id="codeStatus" class="status-ok">No errors checked</span></div>
+    </section>
+
+    <section class="card preview-card">
+      <div class="section-head"><h2>Live Preview</h2><span class="badge">Sandboxed</span></div>
+      <div class="tabs"><button class="tab active" data-preview="browser">Browser</button><button class="tab" data-preview="email">Email View</button><button class="tab" data-preview="wysiwyg">WYSIWYG</button></div>
+      <iframe class="preview-frame" id="previewFrame" sandbox="allow-scripts"></iframe>
+      <div class="wysiwyg"><div class="wysiwyg-area" id="wysiwygArea" contenteditable="true"></div><button class="btn" id="applyWysiwyg" style="margin-top:9px">Apply Visual Edits to HTML</button></div>
+      <div class="preview-note">Preview is isolated from the editor page. External resources may be blocked by the browser or email clients.</div>
+    </section>
+  </div>
+
+  <div class="card">
+    <div class="section-head"><h2>HTML Tools</h2><span class="badge">Quick Edit</span></div>
+    <div class="tool-grid">
+      <div class="tool"><h3>Find & Replace</h3><p>Quickly replace text throughout the HTML source.</p><div class="tool-row"><input id="findText" placeholder="Find" style="width:130px;height:34px"><input id="replaceText" placeholder="Replace" style="width:130px;height:34px"><button class="btn secondary" id="replaceBtn">Replace All</button></div></div>
+    </div>
+  </div>
+</div>
+<button class="theme-toggle" id="themeToggle">☀ / ☾</button>
+
+<script>
+const starter = `<!DOCTYPE html>\n<html lang="en">\n<head>\n  <meta charset="UTF-8">\n  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n  <title>Email HTML</title>\n</head>\n<body style="margin:0;padding:20px;font-family:Arial,sans-serif;">\n  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">\n    <tr><td align="center">\n      <h1>Hello!</h1>\n      <p>Your email content goes here.</p>\n    </td></tr>\n  </table>\n</body>\n</html>`;
+let lastGood = starter;
+const editor = CodeMirror(document.getElementById('codeEditor'), {value:starter,mode:'htmlmixed',theme:'default',lineNumbers:true,lineWrapping:true,autoCloseTags:true,autoCloseBrackets:true,extraKeys:{'Ctrl-S':saveFile,'Cmd-S':saveFile,'Ctrl-Enter':refreshPreview,'Cmd-Enter':refreshPreview,'Ctrl-Space':cmHint,'Cmd-Space':cmHint}});
+function cmHint(){try{CodeMirror.commands.autocomplete(editor)}catch(e){}}
+function refreshPreview(){
+  const frame=document.getElementById('previewFrame');
+  frame.srcdoc=editor.getValue();
+  document.getElementById('editorStatus').textContent='Preview updated';
+}
+function saveFile(){const blob=new Blob([editor.getValue()],{type:'text/html'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='email-template.html';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500);}
+function formatHtml(s){let out='',indent=0;const tokens=s.replace(/>\s*</g,'><').split(/(?=<)|(?<=>)/).filter(Boolean);tokens.forEach(t=>{t=t.trim();if(!t)return;if(/^<\/(?!html)/i.test(t)||/^<\/html/i.test(t))indent=Math.max(0,indent-1);out+='  '.repeat(indent)+t+'\n';if(/^<([a-z0-9]+)(?![^>]*\/>)>/i.test(t)&&!/^<(meta|link|img|input|br|hr|source|area|base|col|embed|param|track|wbr)\b/i.test(t)&&!/^<\//.test(t)&&!/<\/(html|head|body|table|tr|td|div|p|h[1-6]|span|a|style|script)>$/i.test(t))indent++;if(/^<(html|head|body|table|tr|td|div|p|h[1-6]|span|a|style|script)\b/i.test(t)&&!/<\//.test(t)&&!/\/>$/.test(t))indent++;});return out.trim();}
+function basicValidate(html){const issues=[];if(!/^\s*<!doctype\s+html/i.test(html))issues.push('Missing <!DOCTYPE html>.');if(!/<html\b/i.test(html))issues.push('Missing <html>.');if(!/<head\b/i.test(html))issues.push('Missing <head>.');if(!/<body\b/i.test(html))issues.push('Missing <body>.');const stack=[];const tagRe=/<\/?([a-zA-Z][\w:-]*)(?:\s[^>]*)?>/g;let m;const voids=new Set(['area','base','br','col','embed','hr','img','input','link','meta','param','source','track','wbr']);while((m=tagRe.exec(html))){const full=m[0],tag=m[1].toLowerCase();if(voids.has(tag)||/^<\!|^<\?/.test(full)||/\/\s*>$/.test(full))continue;if(/^<\//.test(full)){const i=stack.lastIndexOf(tag);if(i<0)issues.push('Unexpected closing tag </'+tag+'>.');else stack.splice(i,1)}else stack.push(tag)}if(stack.length)issues.push('Possibly unclosed tags: '+stack.slice(-8).join(', '));const ids=[...html.matchAll(/\bid=["']([^"']+)["']/gi)].map(x=>x[1]);const dup=ids.filter((x,i)=>ids.indexOf(x)!==i);if(dup.length)issues.push('Duplicate id values: '+[...new Set(dup)].join(', '));return issues;}
+function validate(){const issues=basicValidate(editor.getValue());const log=document.getElementById('validationLog');if(issues.length){log.textContent=issues.map((x,i)=>(i+1)+'. '+x).join('\n');document.getElementById('codeStatus').textContent=issues.length+' issue(s) found';document.getElementById('codeStatus').className='status-error';}else{log.textContent='No basic HTML structure issues detected.';document.getElementById('codeStatus').textContent='No basic errors detected';document.getElementById('codeStatus').className='status-ok';}return issues;}
+function getBodyParts(html){const m=html.match(/(<body\b[^>]*>)([\s\S]*?)(<\/body\s*>)/i);return m?{open:m[1],body:m[2],close:m[3]}:null}
+function hideBody(){const html=editor.getValue();const p=getBodyParts(html);if(!p){alert('A <body> section was not found.');return}let body=p.body.trim();body=body.replace(/^\s*<!-- EMAIL_EDITOR_HIDDEN_START -->[\s\S]*?<!-- EMAIL_EDITOR_HIDDEN_END -->\s*$/i,'');const mode=document.querySelector('input[name="hideMode"]:checked').value;let wrapped;if(mode==='span')wrapped='<!-- EMAIL_EDITOR_HIDDEN_START --><span style="display:none;">\n'+body+'\n</span><!-- EMAIL_EDITOR_HIDDEN_END -->';else if(mode==='div')wrapped='<!-- EMAIL_EDITOR_HIDDEN_START --><div style="display:none !important; mso-hide:all;">\n'+body+'\n</div><!-- EMAIL_EDITOR_HIDDEN_END -->';else wrapped='<!-- EMAIL_EDITOR_HIDDEN_START -->\n<!--\n'+body.replace(/-->/g,'--&gt;')+'\n-->\n<!-- EMAIL_EDITOR_HIDDEN_END -->';editor.setValue(html.replace(p.body,wrapped));refreshPreview();}
+function showBody(){const html=editor.getValue();const p=getBodyParts(html);if(!p){alert('A <body> section was not found.');return}let body=p.body;body=body.replace(/\s*<!-- EMAIL_EDITOR_HIDDEN_START -->\s*/gi,'').replace(/\s*<!-- EMAIL_EDITOR_HIDDEN_END -->\s*/gi,'');body=body.replace(/^\s*<span\s+style=["'][^"']*display\s*:\s*none[^"']*["']>\s*([\s\S]*?)\s*<\/span>\s*$/i,'$1');body=body.replace(/^\s*<div\s+style=["'][^"']*display\s*:\s*none[^"']*mso-hide\s*:\s*all;?[^"']*["']>\s*([\s\S]*?)\s*<\/div>\s*$/i,'$1');body=body.replace(/^\s*<!--[\s\S]*?-->\s*$/,'');editor.setValue(html.replace(p.body,body));refreshPreview();}
+function updateCursor(){const c=editor.getCursor();document.getElementById('cursorInfo').textContent='Line '+(c.line+1)+', Col '+(c.ch+1)}
+function copyCode(){navigator.clipboard.writeText(editor.getValue()).then(()=>document.getElementById('editorStatus').textContent='Copied')}
+function removeComments(){editor.setValue(editor.getValue().replace(/<!--(?!\s*EMAIL_EDITOR_HIDDEN_START)[\s\S]*?-->/g,''));}
+function minify(){lastGood=editor.getValue();editor.setValue(editor.getValue().replace(/<!--[\s\S]*?-->/g,'').replace(/>\s+</g,'><').replace(/\s{2,}/g,' ').trim());}
+function replaceAll(){const a=document.getElementById('findText').value;if(!a)return;const b=document.getElementById('replaceText').value;editor.setValue(editor.getValue().split(a).join(b));}
+function loadFile(f){const r=new FileReader();r.onload=()=>{editor.setValue(r.result);refreshPreview()};r.readAsText(f)}
+
+document.getElementById('language').onchange=e=>editor.setOption('mode',e.target.value==='htmlmixed'?'htmlmixed':e.target.value);
+document.getElementById('editorTheme').onchange=e=>editor.setOption('theme',e.target.value);
+document.getElementById('formatBtn').onclick=()=>{lastGood=editor.getValue();editor.setValue(formatHtml(editor.getValue()));refreshPreview()};
+document.getElementById('validateBtn').onclick=validate;document.getElementById('previewBtn').onclick=refreshPreview;document.getElementById('replaceBtn').onclick=replaceAll;document.getElementById('hideBodyBtn').onclick=()=>{hideBody();document.getElementById('hideDropdown').classList.remove('open')};document.getElementById('showBodyBtn').onclick=()=>{showBody();document.getElementById('hideDropdown').classList.remove('open')};document.getElementById('downloadBtn').onclick=saveFile;
+document.getElementById('newBtn').onclick=()=>{if(confirm('Clear the editor and start a new HTML file?')){lastGood=starter;editor.setValue(starter);refreshPreview()}};
+document.getElementById('loadBtn').onclick=()=>document.getElementById('fileInput').click();document.getElementById('fileInput').onchange=e=>{if(e.target.files[0])loadFile(e.target.files[0])};
+editor.on('cursorActivity',updateCursor);editor.on('change',()=>document.getElementById('editorStatus').textContent='Edited');
+
+document.querySelectorAll('.tab').forEach(tab=>tab.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));tab.classList.add('active');const type=tab.dataset.preview;document.querySelector('.preview-frame').style.display=type==='wysiwyg'?'none':'block';document.querySelector('.wysiwyg').classList.toggle('active',type==='wysiwyg');if(type==='wysiwyg'){document.getElementById('wysiwygArea').innerHTML=editor.getValue().match(/<body\b[^>]*>([\s\S]*?)<\/body>/i)?.[1]||editor.getValue()}});
+document.getElementById('applyWysiwyg').onclick=()=>{const html=editor.getValue();const m=html.match(/(<body\b[^>]*>)[\s\S]*?(<\/body>)/i);if(m)editor.setValue(html.replace(m[0],m[1]+'\n'+document.getElementById('wysiwygArea').innerHTML+'\n'+m[2]));refreshPreview()};
+document.getElementById('themeToggle').onclick=()=>document.body.classList.toggle('dark-theme');
+const hideDropdown=document.getElementById('hideDropdown');document.getElementById('hideOptionsBtn').onclick=()=>hideDropdown.classList.toggle('open');document.addEventListener('click',e=>{if(!hideDropdown.contains(e.target))hideDropdown.classList.remove('open')});
+window.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='s'){e.preventDefault();saveFile()}if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();refreshPreview()}});
+refreshPreview();updateCursor();
+</script>
+</body>
+</html>
