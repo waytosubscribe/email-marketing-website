@@ -810,6 +810,73 @@
             }
         }
 
+        /* ============================================================
+           RAW MESSAGE / DOMAIN FILTER
+           ============================================================ */
+        .raw-filter-card {
+            margin-top: 18px;
+            padding: 18px;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            background: var(--card-light);
+        }
+
+        .raw-filter-row {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto auto;
+            gap: 10px;
+            align-items: end;
+        }
+
+        .raw-filter-label {
+            display: block;
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .raw-domain-input {
+            min-width: 0;
+        }
+
+        .raw-filter-btn {
+            background: linear-gradient(135deg, #7c3aed, #4f46e5);
+        }
+
+        .raw-filter-clear-btn {
+            background: linear-gradient(135deg, #64748b, #475569);
+        }
+
+        .raw-filter-help {
+            margin-top: 9px;
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.55;
+        }
+
+        .raw-filter-result {
+            margin-top: 12px;
+            padding: 12px 14px;
+            border-radius: 11px;
+            background: rgba(37, 99, 235, .055);
+            border: 1px solid rgba(37, 99, 235, .12);
+            color: var(--muted);
+            font-size: 12px;
+            display: none;
+        }
+
+        @media(max-width:800px) {
+            .raw-filter-row {
+                grid-template-columns: 1fr;
+            }
+
+            .raw-filter-row button {
+                width: 100%;
+            }
+        }
+
+
         /* Reduced motion accessibility */
         @media (prefers-reduced-motion: reduce) {
 
@@ -957,6 +1024,54 @@ All Available Messages
 
                 </div>
 
+            </div>
+
+
+            <!-- RAW MESSAGE + DOMAIN FILTER -->
+            <div class="raw-filter-card">
+                <div class="section-title" style="margin-bottom:12px;">
+                    <div>
+                        <h2>Raw Message Domain Filter</h2>
+                        <div class="raw-filter-help">
+                            Reads the complete raw Gmail message content already retrieved by the extractor.
+                            Enter a domain such as <strong>example.com</strong> to keep only email addresses
+                            found in raw messages that contain that domain.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="raw-filter-row">
+                    <div>
+                        <label class="raw-filter-label" for="domainFilter">
+                            Find Domain in Raw Messages
+                        </label>
+                        <input
+                            class="raw-domain-input"
+                            type="text"
+                            id="domainFilter"
+                            placeholder="example.com"
+                            autocomplete="off"
+                            spellcheck="false">
+                    </div>
+
+                    <button
+                        type="button"
+                        class="raw-filter-btn"
+                        id="domainFilterBtn"
+                        onclick="filterByRawDomain()"
+                        disabled>
+                        Check &amp; Extract
+                    </button>
+
+                    <button
+                        type="button"
+                        class="raw-filter-clear-btn"
+                        onclick="clearDomainFilter()">
+                        Clear
+                    </button>
+                </div>
+
+                <div class="raw-filter-result" id="rawFilterResult"></div>
             </div>
 
 
@@ -1312,6 +1427,15 @@ let tokenClient = null;
 
 let emailAddresses = new Set();
 
+/*
+ * Raw message cache.
+ * Each entry is the decoded RFC-style raw Gmail message for one message ID.
+ * This lets the domain filter inspect the complete message without making
+ * another Gmail API request for messages that were already scanned.
+ */
+let rawMessageCache = new Map();
+let rawMessageSearchSignature = "";
+
 
 // ============================================================
 // EMAIL REGEX
@@ -1562,6 +1686,10 @@ document.getElementById(
 "extractBtn"
 ).disabled = false;
 
+document.getElementById(
+"domainFilterBtn"
+).disabled = false;
+
 }
 
 });
@@ -1614,6 +1742,8 @@ accessToken,
 accessToken = null;
 
 emailAddresses.clear();
+rawMessageCache.clear();
+rawMessageSearchSignature = "";
 
 resetCategories();
 
@@ -2035,6 +2165,227 @@ data.raw
 
 
 // ============================================================
+// RAW MESSAGE DOMAIN FILTER HELPERS
+// ============================================================
+
+function normalizeDomainFilter(value) {
+    return String(value || "")
+        .trim()
+        .toLowerCase()
+        .replace(/^https?:\/\//i, "")
+        .replace(/^www\./i, "")
+        .replace(/^@/, "")
+        .split("/")[0]
+        .split("?")[0]
+        .split("#")[0]
+        .trim();
+}
+
+function rawMessageContainsDomain(raw, domain) {
+    if (!raw || !domain) {
+        return false;
+    }
+
+    /*
+     * Match the domain as a domain token, not as part of another hostname.
+     * example.com matches:
+     *   user@example.com
+     *   https://example.com
+     *   sub.example.com
+     *
+     * It does not match:
+     *   example.com.evil.test
+     */
+    const escaped = domain.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const domainRegex = new RegExp(
+        "(^|[^A-Za-z0-9.-])(?:[A-Za-z0-9-]+\\.)*" +
+        escaped +
+        "(?=$|[^A-Za-z0-9.-])",
+        "i"
+    );
+
+    return domainRegex.test(raw);
+}
+
+function getCurrentSearchSignature(query, maxMessages) {
+    return JSON.stringify({
+        query: query || "",
+        maxMessages: Number(maxMessages) || 1000
+    });
+}
+
+function setRawFilterResult(message, show = true) {
+    const box = document.getElementById("rawFilterResult");
+
+    if (!box) {
+        return;
+    }
+
+    box.textContent = message;
+    box.style.display = show ? "block" : "none";
+}
+
+// ============================================================
+// FILTER CACHED RAW MESSAGES BY DOMAIN
+// ============================================================
+
+function applyRawDomainFilter(domain) {
+    const normalizedDomain = normalizeDomainFilter(domain);
+
+    if (!normalizedDomain) {
+        alert("Please enter a domain such as example.com.");
+        return 0;
+    }
+
+    emailAddresses.clear();
+
+    let matchedMessages = 0;
+
+    for (const raw of rawMessageCache.values()) {
+        if (!rawMessageContainsDomain(raw, normalizedDomain)) {
+            continue;
+        }
+
+        matchedMessages++;
+        extractEmailsFromText(raw);
+    }
+
+    categorizeEmails();
+
+    document.getElementById("emailResults").value =
+        Array.from(emailAddresses).sort().join("\n");
+
+    document.getElementById("uniqueCount").textContent =
+        emailAddresses.size;
+
+    document.getElementById("domainCount").textContent =
+        new Set(
+            Array.from(emailAddresses)
+                .map(email => email.split("@")[1])
+        ).size;
+
+    setRawFilterResult(
+        `${matchedMessages} raw message(s) contained "${normalizedDomain}". ` +
+        `${emailAddresses.size} unique email address(es) were extracted from those messages.`,
+        true
+    );
+
+    setStatus(
+        matchedMessages
+            ? `Domain filter completed: ${emailAddresses.size} unique email addresses found from ${matchedMessages} matching raw message(s).`
+            : `No raw messages contained "${normalizedDomain}".`
+    );
+
+    return matchedMessages;
+}
+
+// ============================================================
+// DOMAIN FILTER BUTTON
+// ============================================================
+
+async function filterByRawDomain() {
+    if (!accessToken) {
+        setStatus("Please connect Gmail first.");
+        return;
+    }
+
+    const domain = normalizeDomainFilter(
+        document.getElementById("domainFilter").value
+    );
+
+    if (!domain) {
+        alert("Enter a domain such as example.com.");
+        return;
+    }
+
+    const maxMessages =
+        parseInt(
+            document.getElementById("maxMessages").value,
+            10
+        ) || 1000;
+
+    const query = buildDateQuery();
+
+    if (query === null) {
+        return;
+    }
+
+    const signature = getCurrentSearchSignature(query, maxMessages);
+
+    /*
+     * Reuse the raw-message cache when the current date/message settings
+     * are identical. Otherwise scan the requested Gmail messages first.
+     */
+    if (
+        rawMessageCache.size === 0 ||
+        rawMessageSearchSignature !== signature
+    ) {
+        await extractAddresses();
+    }
+
+    if (!rawMessageCache.size) {
+        setStatus("No raw messages are available to filter.");
+        setRawFilterResult("No raw messages were loaded.", true);
+        return;
+    }
+
+    document.getElementById("domainFilterBtn").disabled = true;
+
+    try {
+        setStatus(`Checking raw messages for "${domain}"...`);
+
+        const matchedMessages = applyRawDomainFilter(domain);
+
+        if (!matchedMessages) {
+            setRawFilterResult(
+                `No raw messages contained "${domain}".`,
+                true
+            );
+        }
+    } finally {
+        document.getElementById("domainFilterBtn").disabled = false;
+    }
+}
+
+function clearDomainFilter() {
+    const input = document.getElementById("domainFilter");
+
+    if (input) {
+        input.value = "";
+    }
+
+    setRawFilterResult("", false);
+
+    if (rawMessageCache.size) {
+        emailAddresses.clear();
+
+        for (const raw of rawMessageCache.values()) {
+            extractEmailsFromText(raw);
+        }
+
+        categorizeEmails();
+
+        document.getElementById("emailResults").value =
+            Array.from(emailAddresses).sort().join("\n");
+
+        document.getElementById("uniqueCount").textContent =
+            emailAddresses.size;
+
+        document.getElementById("domainCount").textContent =
+            new Set(
+                Array.from(emailAddresses)
+                    .map(email => email.split("@")[1])
+            ).size;
+
+        setStatus(
+            `Domain filter cleared. Showing ${emailAddresses.size} unique email addresses from all cached raw messages.`
+        );
+    }
+}
+
+
+
+// ============================================================
 // PROCESS MESSAGE
 // ============================================================
 
@@ -2045,6 +2396,7 @@ try {
 const raw =
 await fetchRawMessage(id);
 
+rawMessageCache.set(id, raw);
 extractEmailsFromText(raw);
 
 }
@@ -2361,6 +2713,7 @@ return;
 }
 
 emailAddresses.clear();
+rawMessageCache.clear();
 
 resetCategories();
 
@@ -2385,6 +2738,12 @@ document.getElementById(
 ).disabled = true;
 
 document.getElementById(
+"domainFilterBtn"
+).disabled = true;
+
+setRawFilterResult("", false);
+
+document.getElementById(
 "progressWrap"
 ).style.display = "block";
 
@@ -2404,6 +2763,9 @@ await listMessageIds(
 maxMessages,
 query
 );
+
+rawMessageSearchSignature =
+getCurrentSearchSignature(query, maxMessages);
 
 if (!ids.length) {
 
@@ -2443,6 +2805,10 @@ finally {
 document.getElementById(
 "extractBtn"
 ).disabled = false;
+
+document.getElementById(
+"domainFilterBtn"
+).disabled = !accessToken;
 
 }
 
@@ -2723,6 +3089,21 @@ document.getElementById(
 "dateMode"
 ).dispatchEvent(
 new Event("change")
+);
+
+
+// ============================================================
+// RAW DOMAIN FILTER KEYBOARD SUPPORT
+// ============================================================
+
+document.getElementById("domainFilter").addEventListener(
+    "keydown",
+    function(event) {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            filterByRawDomain();
+        }
+    }
 );
 
 
