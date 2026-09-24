@@ -21,6 +21,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/html-hint.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closetag.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/search/searchcursor.min.js"></script>
 
 <style>
 *{box-sizing:border-box}
@@ -29,7 +30,7 @@ body{margin:0;min-height:100vh;font-family:Inter,Arial,sans-serif;color:var(--te
 body.dark-theme{--bg:#070b14;--card:rgba(15,23,42,.82);--panel:#0b1220;--border:rgba(255,255,255,.1);--text:#f8fafc;--muted:#94a3b8;--shadow:0 22px 70px rgba(0,0,0,.34);background:radial-gradient(circle at 12% 8%,rgba(37,99,235,.18),transparent 28%),radial-gradient(circle at 88% 25%,rgba(124,58,237,.16),transparent 30%),#070b14}
 .container{max-width:1400px;margin:auto;padding:25px 20px 60px}.topbar{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:18px;flex-wrap:wrap}.brand{display:flex;align-items:center;gap:12px}.brand-icon{width:48px;height:48px;border-radius:15px;background:linear-gradient(135deg,#2563eb,#7c3aed);display:grid;place-items:center;color:#fff;font-size:23px;box-shadow:0 12px 30px rgba(37,99,235,.25)}.brand h1{font-size:23px;margin:0}.brand p{margin:3px 0 0;color:var(--muted);font-size:13px}.nav-actions{display:flex;gap:8px;flex-wrap:wrap}.btn{border:0;border-radius:11px;padding:10px 14px;font-weight:700;cursor:pointer;color:#fff;background:linear-gradient(135deg,#2563eb,#4f46e5);transition:.2s}.btn:hover{transform:translateY(-1px);filter:brightness(1.05)}.btn.secondary{background:rgba(100,116,139,.14);color:var(--text);border:1px solid var(--border)}.btn.green{background:linear-gradient(135deg,#16a34a,#15803d)}.btn.red{background:linear-gradient(135deg,#dc2626,#b91c1c)}.btn.purple{background:linear-gradient(135deg,#7c3aed,#5b21b6)}.theme-toggle{position:fixed;right:18px;bottom:18px;z-index:20;border:1px solid var(--border);background:var(--card);color:var(--text);border-radius:999px;padding:8px 12px;cursor:pointer;box-shadow:var(--shadow)}
 .card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:18px;box-shadow:var(--shadow);backdrop-filter:blur(18px);margin-bottom:16px}.toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.toolbar select,.toolbar input{height:38px;border:1px solid var(--border);border-radius:9px;background:var(--panel);color:var(--text);padding:0 10px}.toolbar label{font-size:12px;font-weight:700;color:var(--muted)}
-.editor-grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(360px,.85fr);gap:16px}.editor-card,.preview-card{min-height:680px}.section-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}.section-head h2{margin:0;font-size:17px}.badge{font-size:11px;padding:5px 8px;border-radius:99px;background:rgba(37,99,235,.1);color:var(--blue);font-weight:800}.CodeMirror{height:590px;border:1px solid var(--border);border-radius:13px;font-size:13px;line-height:1.55}.CodeMirror-scroll{border-radius:13px}.editor-footer{display:flex;justify-content:space-between;gap:10px;margin-top:10px;color:var(--muted);font-size:12px;flex-wrap:wrap}.status-ok{color:var(--green);font-weight:700}.status-error{color:var(--red);font-weight:700}
+.editor-grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(360px,.85fr);gap:16px}.editor-card,.preview-card{min-height:680px}.section-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}.section-head h2{margin:0;font-size:17px}.badge{font-size:11px;padding:5px 8px;border-radius:99px;background:rgba(37,99,235,.1);color:var(--blue);font-weight:800}.CodeMirror{height:590px;border:1px solid var(--border);border-radius:13px;font-size:13px;line-height:1.55}.CodeMirror-scroll{border-radius:13px}.editor-shell{position:relative}.editor-search{position:absolute;top:10px;right:10px;z-index:12;width:min(430px,calc(100% - 20px));padding:8px;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 12px 30px rgba(15,23,42,.18);display:none}.editor-search.open{display:block}.editor-search-row{display:flex;gap:6px;align-items:center}.editor-search input{flex:1;min-width:0;height:32px;border:1px solid var(--border);border-radius:7px;background:var(--panel);color:var(--text);padding:0 9px;font-size:12px;outline:none}.editor-search input:focus{border-color:var(--blue);box-shadow:0 0 0 2px rgba(37,99,235,.12)}.editor-search .search-btn{height:32px;padding:0 9px;border:1px solid var(--border);border-radius:7px;background:var(--panel);color:var(--text);font-size:11px;font-weight:700;cursor:pointer}.editor-search .search-btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}.editor-search .search-close{font-size:17px;line-height:1;width:30px}.editor-search-status{font-size:10px;color:var(--muted);margin-top:5px}.editor-footer{display:flex;justify-content:space-between;gap:10px;margin-top:10px;color:var(--muted);font-size:12px;flex-wrap:wrap}.status-ok{color:var(--green);font-weight:700}.status-error{color:var(--red);font-weight:700}
 .preview-frame{width:100%;height:590px;border:1px solid var(--border);border-radius:13px;background:#fff}.preview-note{font-size:12px;color:var(--muted);margin-top:9px}.tabs{display:flex;gap:6px;margin-bottom:10px}.tab{border:1px solid var(--border);background:var(--panel);color:var(--text);border-radius:9px;padding:8px 11px;font-size:12px;font-weight:700;cursor:pointer}.tab.active{background:var(--blue);color:#fff;border-color:var(--blue)}
 .tool-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.tool{border:1px solid var(--border);border-radius:15px;padding:15px;background:var(--panel)}.tool h3{font-size:14px;margin:0 0 6px}.tool p{font-size:12px;color:var(--muted);line-height:1.55;margin:0 0 12px}.tool-row{display:flex;gap:7px;flex-wrap:wrap}.tool-row .btn{font-size:12px;padding:8px 10px}.tool select{width:100%;height:38px;border:1px solid var(--border);border-radius:9px;background:var(--panel);color:var(--text);padding:0 8px}
 .wysiwyg{display:none}.wysiwyg.active{display:block}.wysiwyg-area{height:590px;overflow:auto;border:1px solid var(--border);border-radius:13px;background:#fff;color:#111;padding:24px;outline:none}.wysiwyg-area:focus{box-shadow:0 0 0 3px rgba(37,99,235,.1)}
@@ -72,8 +73,24 @@ body.dark-theme{--bg:#070b14;--card:rgba(15,23,42,.82);--panel:#0b1220;--border:
 
   <div class="editor-grid">
     <section class="card editor-card">
-      <div class="section-head"><h2>Code Editor</h2><span class="badge" id="editorStatus">Ready</span></div>
-      <div id="codeEditor"></div>
+      <div class="section-head"><h2>Code Editor</h2><span class="badge" id="editorStatus">Ready • Live Preview</span></div>
+      <div class="editor-shell">
+        <div class="editor-search" id="editorSearch">
+          <div class="editor-search-row">
+            <input id="findText" placeholder="Find" autocomplete="off">
+            <button class="search-btn" id="findPrevBtn" type="button">↑</button>
+            <button class="search-btn" id="findNextBtn" type="button">↓</button>
+            <button class="search-btn" id="replaceBtn" type="button">Replace</button>
+            <button class="search-btn primary" id="replaceAllBtn" type="button">Replace All</button>
+            <button class="search-btn search-close" id="searchCloseBtn" type="button" aria-label="Close">×</button>
+          </div>
+          <div class="editor-search-row" style="margin-top:6px">
+            <input id="replaceText" placeholder="Replace with" autocomplete="off">
+          </div>
+          <div class="editor-search-status" id="searchStatus">Ctrl+F / ⌘F to open</div>
+        </div>
+        <div id="codeEditor"></div>
+      </div>
       <div class="editor-footer"><span id="cursorInfo">Line 1, Col 1</span><span id="codeStatus" class="status-ok">No errors checked</span></div>
     </section>
 
@@ -86,12 +103,6 @@ body.dark-theme{--bg:#070b14;--card:rgba(15,23,42,.82);--panel:#0b1220;--border:
     </section>
   </div>
 
-  <div class="card">
-    <div class="section-head"><h2>HTML Tools</h2><span class="badge">Quick Edit</span></div>
-    <div class="tool-grid">
-      <div class="tool"><h3>Find & Replace</h3><p>Quickly replace text throughout the HTML source.</p><div class="tool-row"><input id="findText" placeholder="Find" style="width:130px;height:34px"><input id="replaceText" placeholder="Replace" style="width:130px;height:34px"><button class="btn secondary" id="replaceBtn">Replace All</button></div></div>
-    </div>
-  </div>
 </div>
 <button class="theme-toggle" id="themeToggle">☀ / ☾</button>
 
@@ -116,22 +127,28 @@ function updateCursor(){const c=editor.getCursor();document.getElementById('curs
 function copyCode(){navigator.clipboard.writeText(editor.getValue()).then(()=>document.getElementById('editorStatus').textContent='Copied')}
 function removeComments(){editor.setValue(editor.getValue().replace(/<!--(?!\s*EMAIL_EDITOR_HIDDEN_START)[\s\S]*?-->/g,''));}
 function minify(){lastGood=editor.getValue();editor.setValue(editor.getValue().replace(/<!--[\s\S]*?-->/g,'').replace(/>\s+</g,'><').replace(/\s{2,}/g,' ').trim());}
-function replaceAll(){const a=document.getElementById('findText').value;if(!a)return;const b=document.getElementById('replaceText').value;editor.setValue(editor.getValue().split(a).join(b));}
+let searchCursorState=null;
+function getSearchQuery(){return document.getElementById('findText').value;}
+function openSearch(){const box=document.getElementById('editorSearch');box.classList.add('open');const input=document.getElementById('findText');input.focus();input.select();}
+function closeSearch(){document.getElementById('editorSearch').classList.remove('open');editor.focus();}
+function findNext(reverse=false){const q=getSearchQuery();if(!q){document.getElementById('searchStatus').textContent='Enter text to search.';return}let cursor=editor.getSearchCursor(q,editor.getCursor(),{caseFold:false});let found=cursor.find(reverse);if(!found){cursor=editor.getSearchCursor(q,reverse?{line:editor.lastLine(),ch:editor.getLine(editor.lastLine()).length}:{line:0,ch:0},{caseFold:false});found=cursor.find(reverse)}if(found){const from=cursor.from(),to=cursor.to();editor.setSelection(from,to);editor.scrollIntoView({from,to},120);searchCursorState={query:q,reverse,pos:reverse?from:to};document.getElementById('searchStatus').textContent='Match found';}else{searchCursorState=null;document.getElementById('searchStatus').textContent='No matches';}}
+function replaceCurrent(){const q=getSearchQuery();if(!q){document.getElementById('searchStatus').textContent='Enter text to search.';return}const b=document.getElementById('replaceText').value;const cursor=editor.getSearchCursor(q,editor.getCursor());if(cursor.find(false)){cursor.replace(b);document.getElementById('searchStatus').textContent='Replaced 1 match';setTimeout(()=>findNext(false),0)}else document.getElementById('searchStatus').textContent='No matches';}
+function replaceAll(){const q=getSearchQuery();if(!q){document.getElementById('searchStatus').textContent='Enter text to search.';return}const b=document.getElementById('replaceText').value;let count=0;const cursor=editor.getSearchCursor(q);while(cursor.findNext()){cursor.replace(b);count++}searchCursorState=null;document.getElementById('searchStatus').textContent=count+' match'+(count===1?'':'es')+' replaced';}
 function loadFile(f){const r=new FileReader();r.onload=()=>{editor.setValue(r.result);refreshPreview()};r.readAsText(f)}
 
 document.getElementById('language').onchange=e=>editor.setOption('mode',e.target.value==='htmlmixed'?'htmlmixed':e.target.value);
 document.getElementById('editorTheme').onchange=e=>editor.setOption('theme',e.target.value);
 document.getElementById('formatBtn').onclick=()=>{lastGood=editor.getValue();editor.setValue(formatHtml(editor.getValue()));refreshPreview()};
-document.getElementById('validateBtn').onclick=validate;document.getElementById('previewBtn').onclick=refreshPreview;document.getElementById('replaceBtn').onclick=replaceAll;document.getElementById('hideBodyBtn').onclick=()=>{hideBody();document.getElementById('hideDropdown').classList.remove('open')};document.getElementById('showBodyBtn').onclick=()=>{showBody();document.getElementById('hideDropdown').classList.remove('open')};document.getElementById('downloadBtn').onclick=saveFile;
+document.getElementById('validateBtn').onclick=validate;document.getElementById('previewBtn').onclick=refreshPreview;document.getElementById('findNextBtn').onclick=()=>findNext(false);document.getElementById('findPrevBtn').onclick=()=>findNext(true);document.getElementById('replaceBtn').onclick=replaceCurrent;document.getElementById('replaceAllBtn').onclick=replaceAll;document.getElementById('searchCloseBtn').onclick=closeSearch;document.getElementById('findText').addEventListener('input',()=>{searchCursorState=null;findNext(false)});document.getElementById('findText').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();findNext(e.shiftKey)}});document.getElementById('replaceText').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();replaceCurrent()}});document.getElementById('hideBodyBtn').onclick=()=>{hideBody();document.getElementById('hideDropdown').classList.remove('open')};document.getElementById('showBodyBtn').onclick=()=>{showBody();document.getElementById('hideDropdown').classList.remove('open')};document.getElementById('downloadBtn').onclick=saveFile;
 document.getElementById('newBtn').onclick=()=>{if(confirm('Clear the editor and start a new HTML file?')){lastGood=starter;editor.setValue(starter);refreshPreview()}};
 document.getElementById('loadBtn').onclick=()=>document.getElementById('fileInput').click();document.getElementById('fileInput').onchange=e=>{if(e.target.files[0])loadFile(e.target.files[0])};
-editor.on('cursorActivity',updateCursor);editor.on('change',()=>document.getElementById('editorStatus').textContent='Edited');
+let previewTimer=null;editor.on('cursorActivity',updateCursor);editor.on('change',()=>{document.getElementById('editorStatus').textContent='Edited • Live Preview';clearTimeout(previewTimer);previewTimer=setTimeout(refreshPreview,250);});
 
 document.querySelectorAll('.tab').forEach(tab=>tab.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));tab.classList.add('active');const type=tab.dataset.preview;document.querySelector('.preview-frame').style.display=type==='wysiwyg'?'none':'block';document.querySelector('.wysiwyg').classList.toggle('active',type==='wysiwyg');if(type==='wysiwyg'){document.getElementById('wysiwygArea').innerHTML=editor.getValue().match(/<body\b[^>]*>([\s\S]*?)<\/body>/i)?.[1]||editor.getValue()}});
 document.getElementById('applyWysiwyg').onclick=()=>{const html=editor.getValue();const m=html.match(/(<body\b[^>]*>)[\s\S]*?(<\/body>)/i);if(m)editor.setValue(html.replace(m[0],m[1]+'\n'+document.getElementById('wysiwygArea').innerHTML+'\n'+m[2]));refreshPreview()};
 document.getElementById('themeToggle').onclick=()=>document.body.classList.toggle('dark-theme');
 const hideDropdown=document.getElementById('hideDropdown');document.getElementById('hideOptionsBtn').onclick=()=>hideDropdown.classList.toggle('open');document.addEventListener('click',e=>{if(!hideDropdown.contains(e.target))hideDropdown.classList.remove('open')});
-window.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='s'){e.preventDefault();saveFile()}if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();refreshPreview()}});
+window.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='f'){e.preventDefault();openSearch()}if((e.ctrlKey||e.metaKey)&&e.key==='s'){e.preventDefault();saveFile()}if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();refreshPreview()}});
 refreshPreview();updateCursor();
 </script>
 </body>
