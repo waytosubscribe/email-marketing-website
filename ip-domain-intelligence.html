@@ -78,11 +78,12 @@ textarea.bulk{width:100%;min-height:145px;resize:vertical}
         <div class="head"><div><h2>IP & Domain Blacklist Checker</h2><p>Check reputation sources from one place.</p></div><button class="btn" onclick="exportTable('blTable','blacklist-results.csv')">Export CSV</button></div>
         <div class="toolbar">
           <select id="blType"><option value="ip">IP addresses</option><option value="domain">Domains</option></select>
+          <input id="spamhausKey" type="password" placeholder="Spamhaus DQS key (optional)" style="min-width:240px">
           <button class="btn" onclick="useCurrentAs('blInput')">Use example</button>
           <button class="btn primary" onclick="runBlacklist()">Check All</button>
         </div>
         <textarea id="blInput" class="bulk" placeholder="One IP or domain per line&#10;Example:&#10;8.8.8.8&#10;1.1.1.1"></textarea>
-        <div class="notice"><b>Important:</b> Spamhaus production DNSBL/API access has query/authentication requirements. This browser-only page does not expose a Spamhaus key. Barracuda and SpamCop checks use DNS-over-HTTPS where the resolver/provider permits the query. For reliable production bulk checks, connect a server-side DNSBL worker.</div>
+        <div class="notice"><b>Blacklist access:</b> Barracuda and SpamCop are queried through DNS-over-HTTPS. Spamhaus uses its current DQS format; paste your Spamhaus DQS query key above for live Spamhaus checks. Without a key, Spamhaus shows <b>KEY REQUIRED</b> instead of a false clear result.</div>
         <div class="grid"><div class="stat"><b id="blTotal">0</b><span>Total</span></div><div class="stat"><b id="blListed">0</b><span>Listed</span></div><div class="stat"><b id="blClear">0</b><span>Clear</span></div><div class="stat"><b id="blUnknown">0</b><span>Unknown / blocked</span></div></div>
         <div class="tablewrap"><table class="table" id="blTable"><thead><tr><th>Target</th><th>Spamhaus</th><th>Barracuda</th><th>SpamCop</th><th>Overall</th></tr></thead><tbody><tr><td colspan="5">Run a check to see results.</td></tr></tbody></table></div>
       </section>
@@ -127,39 +128,74 @@ function loadExample(){
  $('blInput').value='8.8.8.8\\n1.1.1.1'; $('dnsInput').value='example.com\\ngmail.com\\nyahoo.com'; $('ipInput').value='8.8.8.8\\n1.1.1.1'; $('whoisInput').value='8.8.8.8'; showTab('blacklist');
 }
 function useCurrentAs(id){$(id).value='8.8.8.8\\n1.1.1.1'}
-function resetAll(){['blInput','dnsInput','ipInput','whoisInput'].forEach(id=>$(id).value='');document.querySelectorAll('tbody').forEach(t=>t.innerHTML='<tr><td colspan="8">Ready.</td></tr>');$('whoisCards').innerHTML='';$('whoisRaw').style.display='none'}
+function resetAll(){['blInput','dnsInput','ipInput','whoisInput','spamhausKey'].forEach(id=>$(id).value='');document.querySelectorAll('tbody').forEach(t=>t.innerHTML='<tr><td colspan="8">Ready.</td></tr>');$('whoisCards').innerHTML='';$('whoisRaw').style.display='none'}
 async function doh(name,type){
  const u='https://dns.google/resolve?name='+encodeURIComponent(name)+'&type='+encodeURIComponent(type);
  const r=await fetch(u,{headers:{Accept:'application/dns-json'}}); if(!r.ok)throw new Error('DNS HTTP '+r.status); return r.json();
 }
 function reverseIPv4(ip){return ip.split('.').reverse().join('.')+'.'}
+function isIPv4(ip){return /^(?:\d{1,3}\.){3}\d{1,3}$/.test(ip)&&ip.split('.').every(x=>Number(x)>=0&&Number(x)<=255)}
 async function dnsbl(ip,zone){
- if(!/^\\d{1,3}(\\.\\d{1,3}){3}$/.test(ip)) return {status:'N/A',detail:'DNSBL IP check shown for IPv4'};
- const q=reverseIPv4(ip)+zone;
- try{const d=await doh(q,'A');return d.Answer&&d.Answer.length?{status:'LISTED',detail:d.Answer.map(a=>a.data).join(', ')}:{status:'CLEAR',detail:'No DNSBL answer'}}catch(e){return {status:'UNKNOWN',detail:e.message}}
+  if(!isIPv4(ip)) return {status:'N/A',detail:'This DNSBL check currently supports IPv4 addresses'};
+  const q=reverseIPv4(ip)+zone;
+  try{
+    const d=await doh(q,'A');
+    if(d.Answer&&d.Answer.length)return {status:'LISTED',detail:d.Answer.map(a=>a.data).join(', ')};
+    if(d.Status===3)return {status:'CLEAR',detail:'NXDOMAIN / no DNSBL answer'};
+    if(d.Status===5)return {status:'UNKNOWN',detail:'DNS query refused'};
+    return {status:'CLEAR',detail:'No DNSBL answer'};
+  }catch(e){return {status:'UNKNOWN',detail:e.message}}
+}
+async function spamhausDQS(target,key,type){
+  if(!key)return {status:'KEY REQUIRED',detail:'Enter a Spamhaus DQS query key'};
+  let q;
+  if(type==='domain'){
+    q=target.replace(/\.$/,'')+'.'+key+'.dbl.dq.spamhaus.net';
+  }else{
+    if(!isIPv4(target))return {status:'N/A',detail:'Spamhaus DQS IP check currently supports IPv4 in this browser build'};
+    q=reverseIPv4(target)+key+'.zen.dq.spamhaus.net';
+  }
+  try{
+    const d=await doh(q,'A');
+    if(d.Answer&&d.Answer.length)return {status:'LISTED',detail:d.Answer.map(a=>a.data).join(', ')};
+    if(d.Status===3)return {status:'CLEAR',detail:'NXDOMAIN / no blacklist answer'};
+    if(d.Status===5)return {status:'UNKNOWN',detail:'DNS query refused'};
+    return {status:'CLEAR',detail:'No blacklist answer'};
+  }catch(e){return {status:'UNKNOWN',detail:e.message}}
+}
+function renderBL(x){
+  const cls=x.status==='LISTED'?'bad':x.status==='CLEAR'?'ok':'unknown';
+  const detail=x.detail?'<div style="font-size:10px;color:var(--muted);margin-top:4px">'+esc(x.detail)+'</div>':'';
+  return '<span class="badge '+cls+'">'+esc(x.status)+'</span>'+detail;
 }
 async function runBlacklist(){
- const vals=lines('blInput'),type=$('blType').value, body=$('blTable').querySelector('tbody');
- body.innerHTML=''; let listed=0,clear=0,unknown=0;
- $('blTotal').textContent=vals.length;
- for(const target of vals){
-  const tr=document.createElement('tr'); tr.innerHTML='<td>'+esc(target)+'</td><td>Checking…</td><td>Checking…</td><td>Checking…</td><td>Checking…</td>';body.appendChild(tr);
-  if(type==='domain'){
-   tr.cells[1].innerHTML='<span class="badge unknown">AUTH / API</span>';
-   tr.cells[2].innerHTML='<span class="badge unknown">IP LIST</span>';
-   tr.cells[3].innerHTML='<span class="badge unknown">IP LIST</span>';
-   tr.cells[4].innerHTML='<span class="badge unknown">DOMAIN MODE</span>'; unknown++; continue;
+  const vals=lines('blInput'),type=$('blType').value,body=$('blTable').querySelector('tbody'),key=$('spamhausKey').value.trim();
+  body.innerHTML='';
+  let listed=0,clear=0,unknown=0;
+  $('blTotal').textContent=vals.length;$('blListed').textContent='0';$('blClear').textContent='0';$('blUnknown').textContent='0';
+  if(!vals.length){body.innerHTML='<tr><td colspan="5">Enter at least one IP address or domain.</td></tr>';return}
+  for(const target of vals){
+    const tr=document.createElement('tr');
+    tr.innerHTML='<td>'+esc(target)+'</td><td>Checking…</td><td>Checking…</td><td>Checking…</td><td>Checking…</td>';
+    body.appendChild(tr);
+    if(type==='domain'){
+      const sh=await spamhausDQS(target,key,'domain');
+      const b={status:'N/A',detail:'Barracuda BRBL is an IP reputation list'};
+      const sc={status:'N/A',detail:'SpamCop SCBL is an IP blocklist'};
+      tr.cells[1].innerHTML=renderBL(sh);tr.cells[2].innerHTML=renderBL(b);tr.cells[3].innerHTML=renderBL(sc);tr.cells[4].innerHTML=renderBL(sh);
+      if(sh.status==='LISTED')listed++;else if(sh.status==='CLEAR')clear++;else unknown++;
+      continue;
+    }
+    const [sh,b,sc]=await Promise.all([spamhausDQS(target,key,'ip'),dnsbl(target,'b.barracudacentral.org'),dnsbl(target,'bl.spamcop.net')]);
+    tr.cells[1].innerHTML=renderBL(sh);tr.cells[2].innerHTML=renderBL(b);tr.cells[3].innerHTML=renderBL(sc);
+    const states=[sh.status,b.status,sc.status];
+    const overall=states.includes('LISTED')?'LISTED':states.every(x=>x==='CLEAR')?'CLEAR':'UNKNOWN';
+    tr.cells[4].innerHTML=renderBL({status:overall});
+    if(overall==='LISTED')listed++;else if(overall==='CLEAR')clear++;else unknown++;
   }
-  const [b,sc]=await Promise.all([dnsbl(target,'b.barracudacentral.org'),dnsbl(target,'bl.spamcop.net')]);
-  const sh={status:'AUTH/API',detail:'Server-side key required'};
-  const render=x=>'<span class="badge '+(x.status==='LISTED'?'bad':x.status==='CLEAR'?'ok':'unknown')+'">'+esc(x.status)+'</span>';
-  tr.cells[1].innerHTML=render(sh); tr.cells[2].innerHTML=render(b); tr.cells[3].innerHTML=render(sc);
-  const states=[b.status,sc.status]; const overall=states.includes('LISTED')?'LISTED':states.every(x=>x==='CLEAR')?'CLEAR':'UNKNOWN';
-  tr.cells[4].innerHTML=render({status:overall}); if(overall==='LISTED')listed++;else if(overall==='CLEAR')clear++;else unknown++;
-  await sleep(30);
- }
- $('blListed').textContent=listed;$('blClear').textContent=clear;$('blUnknown').textContent=unknown;
+  $('blListed').textContent=listed;$('blClear').textContent=clear;$('blUnknown').textContent=unknown;
 }
+
 async function runDNS(){
  const vals=lines('dnsInput'),type=$('dnsType').value,body=$('dnsTable').querySelector('tbody');body.innerHTML='';
  for(const domain of vals){
