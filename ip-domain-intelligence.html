@@ -135,6 +135,31 @@ async function doh(name,type){
 }
 function reverseIPv4(ip){return ip.split('.').reverse().join('.')+'.'}
 function isIPv4(ip){return /^(?:\d{1,3}\.){3}\d{1,3}$/.test(ip)&&ip.split('.').every(x=>Number(x)>=0&&Number(x)<=255)}
+
+const spamhausCodes={
+  '127.0.0.2':{label:'SBL',desc:'Spamhaus Blocklist'},
+  '127.0.0.3':{label:'CSS',desc:'Composite Snow-Shoe / low-reputation spam source'},
+  '127.0.0.4':{label:'XBL',desc:'Exploits Blocklist / compromised IP'},
+  '127.0.0.9':{label:'DROP',desc:'Do Not Route Or Peer'},
+  '127.0.0.10':{label:'PBL',desc:'Policy Blocklist — ISP maintained'},
+  '127.0.0.11':{label:'PBL',desc:'Policy Blocklist — Spamhaus maintained'},
+  '127.0.0.30':{label:'BCL',desc:'Botnet Controller List'},
+  '127.0.1.2':{label:'DBL',desc:'Low-reputation domain / spam'},
+  '127.0.1.4':{label:'DBL',desc:'Phishing-related domain'},
+  '127.0.1.5':{label:'DBL',desc:'Malware-related domain'},
+  '127.0.1.6':{label:'DBL',desc:'Botnet C&C domain'},
+  '127.0.1.102':{label:'DBL',desc:'Abused-legit domain'},
+  '127.0.1.103':{label:'DBL',desc:'Abused redirector'},
+  '127.0.1.104':{label:'DBL',desc:'Abused domain used in phishing'},
+  '127.0.1.105':{label:'DBL',desc:'Abused domain used by malware'},
+  '127.0.1.106':{label:'DBL',desc:'Abused domain hosting C&C'}
+};
+
+function spamhausCategories(answers){
+  const ips=[...new Set((answers||[]).filter(a=>a.type==='A').map(a=>a.data).filter(x=>x.startsWith('127.')))];
+  return ips.map(ip=>spamhausCodes[ip]||{label:'UNKNOWN',desc:'Spamhaus return code '+ip,code:ip});
+}
+
 async function dnsbl(ip,zone){
   if(!isIPv4(ip)) return {status:'N/A',detail:'This DNSBL check currently supports IPv4 addresses'};
   const q=reverseIPv4(ip)+zone;
@@ -146,28 +171,43 @@ async function dnsbl(ip,zone){
     return {status:'CLEAR',detail:'No DNSBL answer'};
   }catch(e){return {status:'UNKNOWN',detail:e.message}}
 }
+
 async function spamhausDQS(target,key,type){
-  if(!key)return {status:'KEY REQUIRED',detail:'Enter a Spamhaus DQS query key'};
+  if(!key)return {status:'KEY REQUIRED',detail:'Enter a Spamhaus DQS query key',categories:[]};
   let q;
   if(type==='domain'){
     q=target.replace(/\.$/,'')+'.'+key+'.dbl.dq.spamhaus.net';
   }else{
-    if(!isIPv4(target))return {status:'N/A',detail:'Spamhaus DQS IP check currently supports IPv4 in this browser build'};
+    if(!isIPv4(target))return {status:'N/A',detail:'Spamhaus DQS IP check currently supports IPv4 in this browser build',categories:[]};
     q=reverseIPv4(target)+key+'.zen.dq.spamhaus.net';
   }
   try{
     const d=await doh(q,'A');
-    if(d.Answer&&d.Answer.length)return {status:'LISTED',detail:d.Answer.map(a=>a.data).join(', ')};
-    if(d.Status===3)return {status:'CLEAR',detail:'NXDOMAIN / no blacklist answer'};
-    if(d.Status===5)return {status:'UNKNOWN',detail:'DNS query refused'};
-    return {status:'CLEAR',detail:'No blacklist answer'};
-  }catch(e){return {status:'UNKNOWN',detail:e.message}}
+    const categories=spamhausCategories(d.Answer);
+    if(categories.length){
+      return {status:'LISTED',detail:categories.map(c=>c.label+(c.desc?' — '+c.desc:'')).join(' | '),categories};
+    }
+    if(d.Status===3)return {status:'CLEAR',detail:'NXDOMAIN / not listed',categories:[]};
+    if(d.Status===5)return {status:'UNKNOWN',detail:'DNS query refused / service may be disabled for this key',categories:[]};
+    return {status:'CLEAR',detail:'No Spamhaus blacklist answer',categories:[]};
+  }catch(e){return {status:'UNKNOWN',detail:e.message,categories:[]}}
 }
+
 function renderBL(x){
   const cls=x.status==='LISTED'?'bad':x.status==='CLEAR'?'ok':'unknown';
   const detail=x.detail?'<div style="font-size:10px;color:var(--muted);margin-top:4px">'+esc(x.detail)+'</div>':'';
   return '<span class="badge '+cls+'">'+esc(x.status)+'</span>'+detail;
 }
+
+function renderSpamhaus(x){
+  if(x.status==='LISTED' && x.categories && x.categories.length){
+    const badges=x.categories.map(c=>'<span class="badge bad" style="margin:2px 3px 2px 0">'+esc(c.label)+'</span>').join('');
+    const detail=x.categories.map(c=>'<div style="font-size:10px;color:var(--muted);margin-top:3px"><b>'+esc(c.label)+'</b>: '+esc(c.desc)+'</div>').join('');
+    return badges+detail;
+  }
+  return renderBL(x);
+}
+
 async function runBlacklist(){
   const vals=lines('blInput'),type=$('blType').value,body=$('blTable').querySelector('tbody'),key=$('spamhausKey').value.trim();
   body.innerHTML='';
@@ -182,12 +222,12 @@ async function runBlacklist(){
       const sh=await spamhausDQS(target,key,'domain');
       const b={status:'N/A',detail:'Barracuda BRBL is an IP reputation list'};
       const sc={status:'N/A',detail:'SpamCop SCBL is an IP blocklist'};
-      tr.cells[1].innerHTML=renderBL(sh);tr.cells[2].innerHTML=renderBL(b);tr.cells[3].innerHTML=renderBL(sc);tr.cells[4].innerHTML=renderBL(sh);
+      tr.cells[1].innerHTML=renderSpamhaus(sh);tr.cells[2].innerHTML=renderBL(b);tr.cells[3].innerHTML=renderBL(sc);tr.cells[4].innerHTML=renderBL(sh);
       if(sh.status==='LISTED')listed++;else if(sh.status==='CLEAR')clear++;else unknown++;
       continue;
     }
     const [sh,b,sc]=await Promise.all([spamhausDQS(target,key,'ip'),dnsbl(target,'b.barracudacentral.org'),dnsbl(target,'bl.spamcop.net')]);
-    tr.cells[1].innerHTML=renderBL(sh);tr.cells[2].innerHTML=renderBL(b);tr.cells[3].innerHTML=renderBL(sc);
+    tr.cells[1].innerHTML=renderSpamhaus(sh);tr.cells[2].innerHTML=renderBL(b);tr.cells[3].innerHTML=renderBL(sc);
     const states=[sh.status,b.status,sc.status];
     const overall=states.includes('LISTED')?'LISTED':states.every(x=>x==='CLEAR')?'CLEAR':'UNKNOWN';
     tr.cells[4].innerHTML=renderBL({status:overall});
